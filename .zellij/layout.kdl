@@ -23,8 +23,12 @@ layout {
             }
         }
     }
-    tab name="Tab #2" hide_floating_panes=true {
-        pane focus=true
+    tab name="lazygit" hide_floating_panes=true {
+        pane focus=true {
+            name "lazygit"
+            command "lazygit"
+            start_suspended false
+        }
         pane size=1 borderless=true {
             plugin location="zellij:compact-bar"
         }
