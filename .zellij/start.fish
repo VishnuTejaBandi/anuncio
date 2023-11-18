@@ -1,4 +1,4 @@
 #!/usr/bin/fish
-cd ~/dev/@fasal/anuncio/.zellij
-zellij --layout layout.kdl
+set dir (dirname (status --current-filename))
+zellij --layout $dir/layout.kdl
 
