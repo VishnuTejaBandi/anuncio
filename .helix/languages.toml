@@ -1,0 +1,10 @@
+[[language]]
+name = "typescript"
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] } ,"eslint"]
+formatter = { command = 'prettier', args = ["--stdin-filepath", "a.ts"] }
+auto-format = true
+
+
+[[language]]
+name = "css"
+formatter = { command = 'prettier', args = ["--stdin-filepath", "file.css"] }

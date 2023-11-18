@@ -1,0 +1,41 @@
+.anuncio-container-element {
+  * {
+    box-sizing: border-box;
+  }
+  position: relative;
+  display: none;
+
+  video,
+  img {
+    display: none;
+    height: 100%;
+    width: 100%;
+  }
+
+  .active-anuncio-item[data-loading="true"] {
+    & ~ div.anuncio-loader {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: red;
+      top: 0;
+      left: 0;
+    }
+  }
+
+  .anuncio-progress-container {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 10px;
+    padding: 0px 10px;
+
+    .anuncio-progress-element {
+      flex: 1 1;
+    }
+  }
+}

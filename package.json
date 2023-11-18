@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",
+  "name": "anuncio",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "scripts": {
+    "start:dev": ".zellij/start.fish",
+    "start:dev:watch:styles": "sass --watch src/styles/index.scss:dist/styles/index.css",
+    "start:dev:watch:rollup": "rollup -c --watch",
+    "start:dev:watch": "run-p start:dev:watch:*"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.cjs",
+      "import": "./dist/esm/index.js"
+    },
+    "./styles/index.css": "./dist/styles/index.css"
+  },
+  "author": "vishnu bandi",
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "eslint": "^8.53.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "3.0.3",
+    "rollup": "^4.4.1",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-style": "^0.1.0",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "sass": "^1.69.5",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  }
+}
