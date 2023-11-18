@@ -269,8 +269,7 @@ export class Anuncio {
   }
 
   /**
-   *!!!! this method cannot be called on destroyed instances !!!!
-   *
+   *!!!! this method cannot be called on destroyed instances !!!!\
    *- This method does these things:
    *  1. leaves fullscreen
    *  2. hides container element
