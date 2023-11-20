@@ -1,4 +1,4 @@
-import { Item, ImageItem, VideoItem, AnuncioItem, AnuncioItemOrder } from "./types";
+import { AnuncioItemOptions, ImageItem, VideoItem, AnuncioItem, AnuncioItemOrder } from "./types";
 import { Fullscreen, Interval, Validator, generateUniqueId } from "./utils";
 
 type AnuncioElement = "mediaEl" | "progressEl" | "overlayEl";
@@ -19,7 +19,7 @@ export class Anuncio {
    */
   destroyed: boolean = false;
 
-  constructor(items: Item[], order?: AnuncioItemOrder) {
+  constructor(items: AnuncioItemOptions[], order?: AnuncioItemOrder) {
     Validator.validateItems(items);
 
     this.#populateInitialData(items);
@@ -30,7 +30,7 @@ export class Anuncio {
     document.body.append(this.container);
   }
 
-  #populateInitialData(items: Item[]) {
+  #populateInitialData(items: AnuncioItemOptions[]) {
     this.#data = {};
 
     items.forEach((item) => {

@@ -1,7 +1,7 @@
-import { Item } from "src/types";
+import { AnuncioItemOptions } from "src/types";
 
 export const Validator = {
-  validateItems(items: Item[]) {
+  validateItems(items: AnuncioItemOptions[]) {
     if (!Array.isArray(items)) throw new Error("Options must be an array");
 
     items.forEach((item, index) => {

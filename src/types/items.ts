@@ -1,7 +1,12 @@
-import { ImageOptions, Item, VideoOptions } from ".";
+import { ImageOptions, VideoOptions, CommonOptions } from ".";
 
 // TODO change these optional to required
-type CommonData = Pick<Item, "id"> & { loading: boolean; progressEl: HTMLProgressElement; overlayEl?: HTMLElement };
+type CommonData = CommonOptions & {
+  loading: boolean;
+  progressEl: HTMLProgressElement;
+  overlayEl?: HTMLElement;
+};
+
 type ImageData = { mediaEl: HTMLImageElement; duration: number } & ImageOptions;
 type VideoData = { mediaEl: HTMLVideoElement } & VideoOptions;
 
