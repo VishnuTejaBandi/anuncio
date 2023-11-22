@@ -12,13 +12,13 @@ layout {
                 start_suspended false
                 height 30
                 width 120
-                x 134
+                x 151
                 y 10
             }
             pane {
                 height 30
                 width 120
-                x 4
+                x 20
                 y 10
             }
         }

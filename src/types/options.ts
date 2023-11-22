@@ -1,4 +1,4 @@
-export type CommonOptions = { id: string; autoPlay?: boolean };
+export type CommonOptions = { id: string };
 
 export type ImageOptions = CommonOptions & {
   imageUrl: string;

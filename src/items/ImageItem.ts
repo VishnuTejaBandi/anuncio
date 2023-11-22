@@ -1,10 +1,10 @@
-import { AnuncioEvent, ImageOptions } from "./types";
-import { Interval } from "./utils";
+import { ImageOptions } from "../types";
+import { Interval } from "../utils";
+import { Item } from "./item";
 
 let imagePlayerInterval: Interval | null = null;
 
-export class ImageItem {
-  autoPlay: boolean;
+export class ImageItem extends Item {
   mediaEl: HTMLImageElement;
   progressEl: HTMLProgressElement;
 
@@ -14,12 +14,28 @@ export class ImageItem {
   #type: "image" = "image" as const;
 
   constructor(options: ImageOptions) {
+    super();
     this.#id = options.id;
     this.#duration = options.duration ?? 5;
 
-    this.autoPlay = options.autoPlay ?? true;
     this.progressEl = this.#createProgressEl();
     this.mediaEl = this.#createImageEl(options.imageUrl);
+  }
+
+  get loading() {
+    return this.mediaEl.dataset.loading === "true";
+  }
+
+  get id() {
+    return this.#id;
+  }
+
+  get type() {
+    return this.#type;
+  }
+
+  get state() {
+    return this.#state;
   }
 
   #createProgressEl() {
@@ -42,47 +58,14 @@ export class ImageItem {
     image.addEventListener("load", () => {
       image.dataset.loading = "false";
 
-      if (this.#state === "play-queued") this.tryPlayImage();
-      else if (this.autoPlay) this.tryPlayImage();
+      if (this.#state === "play-queued") this.start();
     });
     return image;
-  }
-
-  get loading() {
-    return this.mediaEl.dataset.loading === "true";
-  }
-
-  get id() {
-    return this.#id;
-  }
-
-  get type() {
-    return this.#type;
-  }
-
-  tryPlayImage() {
-    if (this.loading) return;
-
-    this.#state = "playing";
-
-    imagePlayerInterval = new Interval(
-      this.#duration * 1000,
-      (completion) => {
-        if (completion >= this.#duration * 1000) {
-          this.#dispatchEvent("play-complete");
-        } else {
-          // updating the progress value with completion percentage
-          this.progressEl.value = completion / (this.#duration * 10);
-        }
-      },
-      this.#duration * 5
-    );
   }
 
   close() {
     this.#state = "closed";
 
-    this.mediaEl.style.display = "none";
     this.progressEl.value = 0;
 
     // garbage collect interval
@@ -105,22 +88,23 @@ export class ImageItem {
   }
 
   start() {
-    if (this.#state === "closed") {
-      if (this.loading) this.#state = "play-queued";
-      else this.tryPlayImage();
+    if (this.#state === "closed" && this.loading) {
+      this.#state = "play-queued";
+    } else if (this.#state === "closed" || this.#state === "play-queued") {
+      this.#state = "playing";
+
+      imagePlayerInterval = new Interval(
+        this.#duration * 1000,
+        (completion) => {
+          if (completion >= this.#duration * 1000) {
+            this.dispatchEvent("play-complete");
+          } else {
+            // updating the progress value with completion percentage
+            this.progressEl.value = completion / (this.#duration * 10);
+          }
+        },
+        this.#duration * 5
+      );
     }
-  }
-
-  addEventListener(name: AnuncioEvent, handler: () => void) {
-    this.mediaEl.addEventListener(name, handler);
-  }
-
-  removeEventListener(name: AnuncioEvent, handler: () => void) {
-    this.mediaEl.removeEventListener(name, handler);
-  }
-
-  #dispatchEvent(name: AnuncioEvent) {
-    const event = new Event(name);
-    this.mediaEl.dispatchEvent(event);
   }
 }

@@ -1,173 +1,88 @@
-import { AnuncioItemOptions, ImageItem, VideoItem, AnuncioItem, AnuncioItemOrder } from "./types";
-import { Fullscreen, Interval, Validator, generateUniqueId } from "./utils";
+import { ImageItem } from "./items/ImageItem";
+import { VideoItem } from "./items/VideoItem";
+import { AnuncioItemOptions } from "./types";
+import { Fullscreen, generateUniqueId } from "./utils";
 
-type AnuncioElement = "mediaEl" | "progressEl" | "overlayEl";
+type AnuncioConfigOptions = {
+  loader?: HTMLElement;
+  containerId?: string;
+  order?: (ImageItem["id"] | VideoItem["id"])[];
+  autostart?: boolean;
+};
+
+type AnuncioItemMap = Map<string, ImageItem | VideoItem>;
 
 export class Anuncio {
-  #data: Record<AnuncioItem["id"], AnuncioItem> = {};
-  /**
-   *The container for all the anuncio elements(progress, media, overlay, loader).\
-   *This container will be appended to document body.
-   */
-  container: HTMLDivElement;
-  #currentIndex: number;
-  #order: AnuncioItemOrder;
-  #imagePlayerInterval: Interval | null = null;
-  /**
-   *The destroyed status of the instance, calling any public method on a destroyed
-   *  anucio instance will throw error.
-   */
-  destroyed: boolean = false;
+  autostart: boolean;
+  items: AnuncioItemMap;
 
-  constructor(items: AnuncioItemOptions[], order?: AnuncioItemOrder) {
-    Validator.validateItems(items);
+  #container: HTMLDivElement;
+  #currentIndex: number = -1;
+  #loader: HTMLElement;
+  #order: (ImageItem["id"] | VideoItem["id"])[];
+  #state: "playing" | "closed" | "destroyed" | "paused" = "closed";
 
-    this.#populateInitialData(items);
-    this.container = this.#createAnuncioContainer();
-    this.#currentIndex = -1;
-    // TODO validate order
-    this.#order = order ?? Object.keys(this.#data);
-    document.body.append(this.container);
+  constructor(itemOptions: AnuncioItemOptions[], configOptions: AnuncioConfigOptions) {
+    const containerId = configOptions.containerId ?? generateUniqueId();
+    this.#container = this.#createContainer(containerId);
+    this.#loader = configOptions.loader ?? this.#createLoader(containerId);
+
+    this.autostart = configOptions.autostart ?? true;
+    this.items = this.#createItemMap(itemOptions);
+    this.#order = configOptions.order ?? Array.from(this.items.keys());
+
+    this.#bootstrapAndMount();
   }
 
-  #populateInitialData(items: AnuncioItemOptions[]) {
-    this.#data = {};
-
-    items.forEach((item) => {
-      let _item;
-      if (item.type === "image") _item = this.#renderImageItem({ ...item, loading: true, duration: 5 });
-      else _item = this.#renderVideoItem({ ...item, loading: true });
-
-      if (this.#data[_item.id]) throw new Error("duplicate id" + _item.id);
-      else this.#data[_item.id] = _item;
-    });
+  get state() {
+    return this.#state;
   }
 
-  #createImageProgressElement(item: Omit<ImageItem, AnuncioElement>) {
-    const progress = document.createElement("progress");
-
-    progress.id = "anuncio-progress-for-" + item.id;
-    progress.classList.add("anuncio-progress-element");
-    progress.setAttribute("min", "0");
-    progress.setAttribute("max", "100");
-    progress.value = 0;
-
-    return progress;
+  get currentItem() {
+    if (this.#currentIndex >= 0 && this.#currentIndex < this.items.size) {
+      return this.items.get(this.#order[this.#currentIndex]);
+    }
   }
 
-  #tryPlayImage(item: ImageItem) {
-    if (item.loading) return;
-
-    this.#imagePlayerInterval = new Interval(
-      item.duration * 1000,
-      (completion) => {
-        if (completion >= item.duration * 1000) {
-          this.playNextItem();
-        } else {
-          // updating the progress value with completion percentage
-          item.progressEl.value = completion / (item.duration * 10);
-        }
-      },
-      item.duration * 5
-    );
-  }
-
-  #createImageElement(item: Omit<ImageItem, AnuncioElement>) {
-    const image = document.createElement("img");
-    image.id = "anuncio-image-for-" + item.id;
-
-    image.src = item.imageUrl;
-    image.dataset.loading = "true";
-
-    image.addEventListener("load", () => {
-      image.dataset.loading = "false";
-      item.loading = false;
-
-      if (this.#currentIndex < 0) return;
-
-      const currentItem = this.#data[this.#order[this.#currentIndex]];
-      if (currentItem.type === "image" && currentItem.id === item.id) this.#tryPlayImage(currentItem);
-    });
-
-    return image;
-  }
-
-  #renderImageItem(item: Omit<ImageItem, AnuncioElement>): ImageItem {
-    return Object.assign(item, {
-      progressEl: this.#createImageProgressElement(item),
-      mediaEl: this.#createImageElement(item),
-    });
-  }
-
-  #createVideoElement(item: Omit<VideoItem, AnuncioElement>) {
-    const video = document.createElement("video");
-    video.id = "anuncio-video-for-" + item.id;
-    video.src = item.videoUrl;
-    video.dataset.loading = "true";
-
-    video.addEventListener("waiting", () => {
-      item.loading = true;
-      video.dataset.loading = "true";
-    });
-
-    video.addEventListener("canplay", () => {
-      item.loading = false;
-      video.dataset.loading = "false";
-    });
-
-    video.addEventListener("ended", this.playNextItem);
-
-    return video;
-  }
-
-  #createVideoProgressElement(item: Omit<VideoItem, Exclude<AnuncioElement, "mediaEl">>) {
-    const progress = document.createElement("progress");
-    progress.id = "anuncio-progress-for-" + item.id;
-    progress.classList.add("anuncio-progress-element");
-    progress.setAttribute("min", "0");
-    progress.value = 0;
-
-    item.mediaEl.addEventListener("timeupdate", () => {
-      if (!progress.getAttribute("max")) {
-        progress.setAttribute("max", item.mediaEl.duration.toString());
+  #createItemMap(itemOptions: AnuncioItemOptions[]): AnuncioItemMap {
+    const items: AnuncioItemMap = new Map();
+    itemOptions.forEach((options) => {
+      let item: ImageItem | VideoItem;
+      if (options.type == "image") {
+        item = new ImageItem(options);
+      } else {
+        item = new VideoItem(options);
       }
 
-      progress.value = item.mediaEl.currentTime;
+      item.addEventListener("play-complete", () => {
+        this.playNextItem();
+      });
+
+      items.set(item.id, item);
     });
 
-    return progress;
+    return items;
   }
 
-  #renderVideoItem(item: Omit<VideoItem, AnuncioElement>): VideoItem {
-    const videoItemWithoutProgress = Object.assign(item, { mediaEl: this.#createVideoElement(item) });
-    return Object.assign(videoItemWithoutProgress, {
-      progressEl: this.#createVideoProgressElement(videoItemWithoutProgress),
-    });
+  #createLoader(containerId: string) {
+    const loader = document.createElement("div");
+    loader.classList.add("anuncio-loader-element");
+    loader.id = "anuncio-loader-for" + containerId;
+
+    return loader;
   }
 
-  #createAnuncioContainer() {
+  #createContainer(containerId: string) {
     const container = document.createElement("div");
-    container.id = generateUniqueId();
+    container.id = containerId;
     container.classList.add("anuncio-container-element");
+    container.style.display = "none";
 
-    // progress elements
     const progressContainer = document.createElement("div");
     progressContainer.classList.add("anuncio-progress-container");
-    progressContainer.append(...Object.values(this.#data).map((item) => item.progressEl));
     progressContainer.id = "anuncio-progress-container-" + container.id;
     container.append(progressContainer);
 
-    // media elements
-    container.append(...Object.values(this.#data).map((item) => item.mediaEl));
-
-    // loader
-    // TODO make loader configurable
-    const loader = document.createElement("div");
-    loader.id = "anuncio-loader-" + container.id;
-    loader.classList.add("anuncio-loader");
-    container.append(loader);
-
-    // cleanup anuncio when leaving fullscreen mode
     container.addEventListener("fullscreenchange", () => {
       if (!document.fullscreenElement) this.close();
     });
@@ -175,129 +90,111 @@ export class Anuncio {
     return container;
   }
 
-  #playItemAtIndex(index: number) {
-    // TODO callback before play item
+  #bootstrapAndMount() {
+    const progressContainer = this.#container.querySelector(".anuncio-progress-container")!;
 
-    const item = this.#data[this.#order[index]];
-    if (item.type === "video") {
-      item.mediaEl.play();
-    } else {
-      this.#tryPlayImage(item);
+    for (const item of this.items.values()) {
+      progressContainer.appendChild(item.progressEl);
+      this.#container.appendChild(item.mediaEl);
     }
 
-    item.mediaEl.classList.add("active-anuncio-item");
-    item.mediaEl.style.display = "block";
+    this.#container.append(this.#loader);
+
+    document.body.appendChild(this.#container);
   }
 
-  /**
-   *Hides the current playing item and plays the next item.\
-   *If the current item is current item is the last item in order, closes the anuncio instance.
-   */
-  playNextItem() {
-    if (this.destroyed) throw new Error("cannot use play on destroyed instance");
-
-    this.#closeItemAtIndex(this.#currentIndex);
-    if (this.#currentIndex < this.#order.length - 1) {
-      this.#currentIndex += 1;
-      this.#playItemAtIndex(this.#currentIndex);
-    } else if (this.#currentIndex === this.#order.length - 1) {
-      this.close();
+  showCurrentItem() {
+    if (this.currentItem) {
+      this.currentItem.mediaEl.style.display = "block";
+      this.currentItem.mediaEl.classList.add("active-anuncio-item");
     }
   }
 
-  /**
-   *Hides the current playing item and plays the previous item.\
-   *If the current item is current item is the first item in order, nothing happens.
-   */
-  playPreviousItem() {
-    if (this.destroyed) throw new Error("cannot use play on destroyed instance");
-
-    if (this.#currentIndex <= 0) return;
-    this.#closeItemAtIndex(this.#currentIndex);
-    this.#currentIndex -= 1;
-    this.#playItemAtIndex(this.#currentIndex);
+  closeCurrentItem() {
+    if (this.currentItem) {
+      this.currentItem.close();
+      this.currentItem.mediaEl.style.display = "none";
+      this.currentItem.mediaEl.classList.remove("active-anuncio-item");
+    }
   }
 
-  pause() {
-    if (this.destroyed) throw new Error("cannot pause on destroyed instance");
-    if (this.#currentIndex < 0) return;
+  async start() {
+    if (this.#state === "closed") {
+      this.#container.style.display = "block";
 
-    const currentItem = this.#data[this.#order[this.#currentIndex]];
-    if (currentItem.type === "video") {
-      currentItem.mediaEl.pause();
-    } else {
-      this.#imagePlayerInterval?.pause();
+      await Fullscreen.tryEnter(this.#container);
+      this.#currentIndex = 0;
+
+      this.#state = "playing";
+      if (!this.autostart) this.showCurrentItem();
+      else this.playCurrentItem();
+    }
+  }
+
+  close() {
+    if (this.#state === "playing") {
+      Fullscreen.tryLeave(this.#container);
+
+      this.#state = "closed";
+      this.closeCurrentItem();
+      this.#currentIndex = -1;
+      this.#container.style.display = "none";
     }
   }
 
   resume() {
-    if (this.destroyed) throw new Error("cannot resume on destroyed instance");
-    if (this.#currentIndex < 0) return;
+    if (this.#state === "paused") {
+      this.#state = "playing";
+      this.currentItem?.resume();
+    }
+  }
 
-    const currentItem = this.#data[this.#order[this.#currentIndex]];
-    if (currentItem.type === "video") {
-      currentItem.mediaEl.play();
+  pause() {
+    if (this.#state === "playing") {
+      this.#state = "paused";
+      this.currentItem?.pause();
+    }
+  }
+
+  playCurrentItem() {
+    if (this.#state !== "destroyed") {
+      this.currentItem?.start();
+      this.showCurrentItem();
+    }
+  }
+
+  playNextItem() {
+    this.closeCurrentItem();
+
+    if (this.#currentIndex < this.items.size - 1! && this.#state !== "destroyed") {
+      this.#currentIndex += 1;
+      this.playCurrentItem();
     } else {
-      this.#imagePlayerInterval?.resume();
+      this.close();
+      return;
     }
   }
 
-  async play() {
-    if (this.destroyed) throw new Error("cannot use play on destroyed instance");
+  playPreviousItem() {
+    this.closeCurrentItem();
 
-    await Fullscreen.tryEnter(this.container);
-    this.container.style.display = "block";
-
-    this.#currentIndex = 0;
-    this.#playItemAtIndex(this.#currentIndex);
-  }
-
-  #closeItemAtIndex(index: number) {
-    const item = this.#data[this.#order[index]];
-
-    if (item.type === "video") {
-      item.mediaEl.pause();
-      item.mediaEl.currentTime = 0;
-    } else {
-      item.progressEl.value = 0;
-      this.#imagePlayerInterval?.destroy();
-    }
-
-    // TODO make this class configurable
-    item.mediaEl.classList.remove("active-anuncio-item");
-    item.mediaEl.style.display = "none";
-  }
-
-  /**
-   *!!!! this method cannot be called on destroyed instances !!!!\
-   *- This method does these things:
-   *  1. leaves fullscreen
-   *  2. hides container element
-   *  3. cleansup current playing item -> resets progress, seeks video to 0
-   */
-  async close() {
-    if (this.destroyed) throw new Error("cannot use close on destroyed instance");
-
-    await Fullscreen.tryLeave(this.container);
-
-    if (this.#currentIndex > -1) {
-      //TODO callback before close
-      this.#closeItemAtIndex(this.#currentIndex);
-      this.container.style.display = "none";
-      this.#currentIndex = -1;
+    if (this.#currentIndex >= 0 && this.#state !== "destroyed") {
+      this.#currentIndex -= 1;
+      this.playCurrentItem();
     }
   }
 
-  async destroy() {
-    await this.close();
-    const container = this.container;
+  destroy() {
+    this.currentItem?.close();
+    // @ts-expect-error cleanup
+    this.items = null;
 
-    // @ts-expect-error cleanup - when garbage collecting the container all its events will also be removed
-    this.container = null;
-    // @ts-expect-error cleanup - when garbage collecting the elements all its events will also be removed
-    this.#data = null;
-    this.destroyed = true;
+    // @ts-expect-error cleanup
+    this.#loader = null;
 
-    container.remove();
+    // @ts-expect-error cleanup
+    this.#container = null;
+
+    this.#state = "destroyed";
   }
 }

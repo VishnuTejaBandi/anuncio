@@ -13,7 +13,7 @@
   }
 
   .active-anuncio-item[data-loading="true"] {
-    & ~ div.anuncio-loader {
+    & ~ div.anuncio-loader-element {
       position: absolute;
       width: 50px;
       height: 50px;

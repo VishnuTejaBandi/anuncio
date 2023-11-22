@@ -1,7 +1,7 @@
-import { AnuncioEvent, VideoOptions } from "./types";
+import { VideoOptions } from "../types";
+import { Item } from "./item";
 
-export class VideoItem {
-  autoPlay: boolean;
+export class VideoItem extends Item {
   mediaEl: HTMLVideoElement;
   progressEl: HTMLProgressElement;
 
@@ -10,14 +10,30 @@ export class VideoItem {
   #type: "image" = "image" as const;
 
   constructor(options: VideoOptions) {
+    super();
     this.#id = options.id;
 
-    this.autoPlay = options.autoPlay ?? true;
-    this.progressEl = this.#CreateProgressEl();
+    this.progressEl = this.#createProgressEl();
     this.mediaEl = this.#createVideoEl(options.videoUrl, this.progressEl);
   }
 
-  #CreateProgressEl() {
+  get loading() {
+    return this.mediaEl.dataset.loading === "true";
+  }
+
+  get id() {
+    return this.#id;
+  }
+
+  get type() {
+    return this.#type;
+  }
+
+  get state() {
+    return this.#state;
+  }
+
+  #createProgressEl() {
     const progress = document.createElement("progress");
 
     progress.id = "anuncio-progress-for-" + this.#id;
@@ -35,6 +51,7 @@ export class VideoItem {
     video.id = "anuncio-video-for" + this.#id;
 
     video.addEventListener("canplay", () => {
+      if (this.#state === "play-queued") this.mediaEl.play();
       video.dataset.loading = "false";
     });
 
@@ -43,7 +60,7 @@ export class VideoItem {
     });
 
     video.addEventListener("ended", () => {
-      this.#dispatchEvent("play-complete");
+      this.dispatchEvent("play-complete");
     });
 
     video.addEventListener("timeupdate", () => {
@@ -54,18 +71,6 @@ export class VideoItem {
     });
 
     return video;
-  }
-
-  get loading() {
-    return this.mediaEl.dataset.loading === "true";
-  }
-
-  get id() {
-    return this.#id;
-  }
-
-  get type() {
-    return this.#type;
   }
 
   close() {
@@ -93,22 +98,11 @@ export class VideoItem {
   }
 
   start() {
-    if (this.#state === "closed") {
-      if (this.loading) this.#state = "play-queued";
-      else this.mediaEl.play();
+    if (this.#state === "closed" && this.loading) {
+      this.#state = "play-queued";
+    } else if (this.#state === "closed" || this.#state === "play-queued") {
+      this.#state = "playing";
+      this.mediaEl.play();
     }
-  }
-
-  addEventListener(name: AnuncioEvent, handler: () => void) {
-    this.mediaEl.addEventListener(name, handler);
-  }
-
-  removeEventListener(name: AnuncioEvent, handler: () => void) {
-    this.mediaEl.removeEventListener(name, handler);
-  }
-
-  #dispatchEvent(name: AnuncioEvent) {
-    const event = new Event(name);
-    this.mediaEl.dispatchEvent(event);
   }
 }
