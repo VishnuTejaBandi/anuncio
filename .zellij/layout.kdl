@@ -8,7 +8,7 @@ layout {
             plugin location="zellij:compact-bar"
         }
         floating_panes {
-            pane command="yazi" {
+            pane command="ranger" {
                 start_suspended false
                 height 30
                 width 120

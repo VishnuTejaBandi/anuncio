@@ -48,7 +48,7 @@ export class VideoItem extends Item {
     const video = document.createElement("video");
     video.src = videoUrl;
     video.dataset.loading = "true";
-    video.id = "anuncio-video-for" + this.#id;
+    video.id = "anuncio-video-for-" + this.#id;
 
     video.addEventListener("canplay", () => {
       if (this.#state === "play-queued") this.mediaEl.play();

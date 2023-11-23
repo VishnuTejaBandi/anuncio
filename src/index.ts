@@ -1,18 +1,9 @@
 import { ImageItem } from "./items/ImageItem";
 import { VideoItem } from "./items/VideoItem";
-import { AnuncioItemOptions } from "./types";
+import { AnuncioConfigOptions, AnuncioItemMap, AnuncioItemOptions } from "./types";
 import { Fullscreen, generateUniqueId } from "./utils";
 
-type AnuncioConfigOptions = {
-  loader?: HTMLElement;
-  containerId?: string;
-  order?: (ImageItem["id"] | VideoItem["id"])[];
-  autostart?: boolean;
-};
-
-type AnuncioItemMap = Map<string, ImageItem | VideoItem>;
-
-export class Anuncio {
+class Anuncio {
   autostart: boolean;
   items: AnuncioItemMap;
 
@@ -36,6 +27,22 @@ export class Anuncio {
 
   get state() {
     return this.#state;
+  }
+
+  get order() {
+    return this.#order;
+  }
+
+  set order(newOrder) {
+    if (this.#state !== "closed") {
+      throw new Error("Order cannot be set when anuncio is " + this.#state);
+    }
+
+    this.#order = newOrder;
+    this.#order.forEach((itemId, index) => {
+      const item = this.items.get(itemId);
+      if (item) item.progressEl.style.order = index.toString();
+    });
   }
 
   get currentItem() {
@@ -98,6 +105,9 @@ export class Anuncio {
       this.#container.appendChild(item.mediaEl);
     }
 
+    // this calls the setter and set the order of the progress elements
+    this.order = this.#order;
+
     this.#container.append(this.#loader);
 
     document.body.appendChild(this.#container);
@@ -127,7 +137,7 @@ export class Anuncio {
 
       this.#state = "playing";
       if (!this.autostart) this.showCurrentItem();
-      else this.playCurrentItem();
+      else this.#playCurrentItem();
     }
   }
 
@@ -156,7 +166,7 @@ export class Anuncio {
     }
   }
 
-  playCurrentItem() {
+  #playCurrentItem() {
     if (this.#state !== "destroyed") {
       this.currentItem?.start();
       this.showCurrentItem();
@@ -168,7 +178,7 @@ export class Anuncio {
 
     if (this.#currentIndex < this.items.size - 1! && this.#state !== "destroyed") {
       this.#currentIndex += 1;
-      this.playCurrentItem();
+      this.#playCurrentItem();
     } else {
       this.close();
       return;
@@ -180,7 +190,7 @@ export class Anuncio {
 
     if (this.#currentIndex >= 0 && this.#state !== "destroyed") {
       this.#currentIndex -= 1;
-      this.playCurrentItem();
+      this.#playCurrentItem();
     }
   }
 
@@ -198,3 +208,5 @@ export class Anuncio {
     this.#state = "destroyed";
   }
 }
+
+export { Anuncio, ImageItem, VideoItem };
