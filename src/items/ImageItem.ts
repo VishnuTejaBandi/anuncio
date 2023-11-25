@@ -1,12 +1,12 @@
 import { ImageOptions } from "../types";
-import { Interval } from "../utils";
+import { AnuncioProgress, Interval } from "../utils";
 import { Item } from "./item";
 
 let imagePlayerInterval: Interval | null = null;
 
 export class ImageItem extends Item {
   mediaEl: HTMLImageElement;
-  progressEl: HTMLProgressElement;
+  progress: AnuncioProgress;
 
   #duration: ImageOptions["duration"];
   #id: ImageOptions["id"];
@@ -18,12 +18,16 @@ export class ImageItem extends Item {
     this.#id = options.id;
     this.#duration = options.duration ?? 5;
 
-    this.progressEl = this.#createProgressEl();
+    this.progress = new AnuncioProgress({ id: "anuncio-progress-for-" + this.#id, max: 100 });
     this.mediaEl = this.#createImageEl(options.imageUrl);
   }
 
   get loading() {
     return this.mediaEl.dataset.loading === "true";
+  }
+
+  get progressEl() {
+    return this.progress.element;
   }
 
   get id() {
@@ -36,17 +40,6 @@ export class ImageItem extends Item {
 
   get state() {
     return this.#state;
-  }
-
-  #createProgressEl() {
-    const progress = document.createElement("progress");
-
-    progress.id = "anuncio-progress-for-" + this.#id;
-    progress.classList.add("anuncio-progress-element");
-    progress.max = 100;
-    progress.value = 0;
-
-    return progress;
   }
 
   #createImageEl(imageUrl: ImageOptions["imageUrl"]) {
@@ -66,7 +59,7 @@ export class ImageItem extends Item {
   close() {
     this.#state = "closed";
 
-    this.progressEl.value = 0;
+    this.progress.value = 0;
 
     // garbage collect interval
     imagePlayerInterval?.destroy();
@@ -100,10 +93,10 @@ export class ImageItem extends Item {
             this.dispatchEvent("play-complete");
           } else {
             // updating the progress value with completion percentage
-            this.progressEl.value = completion / (this.#duration * 10);
+            this.progress.value = completion / (this.#duration * 10);
           }
         },
-        this.#duration * 5
+        1000 / 60
       );
     }
   }

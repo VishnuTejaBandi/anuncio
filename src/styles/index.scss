@@ -1,9 +1,26 @@
 .anuncio-container-element {
+  &.anuncio-span-full-screen {
+    position: absolute;
+    height: 100dvh;
+    width: 100dvw;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    background: black;
+  }
+
   * {
     box-sizing: border-box;
   }
   position: relative;
   display: none;
+
+  .anuncio-close-button {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    z-index: 100;
+  }
 
   video,
   img {
@@ -33,9 +50,23 @@
     align-items: center;
     gap: 10px;
     padding: 0px 10px;
+    margin-top: 10px;
 
     .anuncio-progress-element {
       flex: 1 1;
+      position: relative;
+      background: white;
+      height: 3px;
+      border-radius: 3px;
+      overflow: hidden;
+
+      &::before {
+        content: "";
+        background: green;
+        position: absolute;
+        height: 100%;
+        width: var(--progress-percentage);
+      }
     }
   }
 }

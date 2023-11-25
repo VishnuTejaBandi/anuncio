@@ -1,3 +1,4 @@
+import "./utils/progress";
 import { ImageItem } from "./items/ImageItem";
 import { VideoItem } from "./items/VideoItem";
 import { AnuncioConfigOptions, AnuncioItemMap, AnuncioItemOptions } from "./types";
@@ -7,22 +8,26 @@ class Anuncio {
   autostart: boolean;
   items: AnuncioItemMap;
 
-  #container: HTMLDivElement;
+  container: HTMLDivElement;
   #currentIndex: number = -1;
-  #loader: HTMLElement;
   #order: (ImageItem["id"] | VideoItem["id"])[];
   #state: "playing" | "closed" | "destroyed" | "paused" = "closed";
+  nativeFullScreen: boolean;
 
   constructor(itemOptions: AnuncioItemOptions[], configOptions: AnuncioConfigOptions) {
     const containerId = configOptions.containerId ?? generateUniqueId();
-    this.#container = this.#createContainer(containerId);
-    this.#loader = configOptions.loader ?? this.#createLoader(containerId);
+    const loader = configOptions.loader ?? this.#createLoader(containerId);
+    const closeButton = configOptions.closeButton ?? this.#createCloseButton(containerId);
 
+    const configOptionsWithDefaults = { ...configOptions, containerId, loader, closeButton };
+
+    this.nativeFullScreen = configOptions.nativeFullScreen ?? false;
     this.autostart = configOptions.autostart ?? true;
     this.items = this.#createItemMap(itemOptions);
     this.#order = configOptions.order ?? Array.from(this.items.keys());
 
-    this.#bootstrapAndMount();
+    this.container = this.#createContainer(configOptionsWithDefaults);
+    document.body.appendChild(this.container);
   }
 
   get state() {
@@ -79,38 +84,46 @@ class Anuncio {
     return loader;
   }
 
-  #createContainer(containerId: string) {
+  #createCloseButton(containerId: string) {
+    const button = document.createElement("button");
+    button.innerText = "X";
+    button.id = "anuncio-close-button-for-" + containerId;
+    button.classList.add("anuncio-close-button");
+
+    return button;
+  }
+
+  #createContainer(
+    configOptions: AnuncioConfigOptions & Required<Pick<AnuncioConfigOptions, "containerId" | "loader" | "closeButton">>
+  ) {
     const container = document.createElement("div");
-    container.id = containerId;
+    container.id = configOptions.containerId;
     container.classList.add("anuncio-container-element");
     container.style.display = "none";
+    container.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) this.close();
+    });
 
     const progressContainer = document.createElement("div");
     progressContainer.classList.add("anuncio-progress-container");
     progressContainer.id = "anuncio-progress-container-" + container.id;
     container.append(progressContainer);
 
-    container.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement) this.close();
+    configOptions.closeButton.addEventListener("click", () => {
+      this.close();
     });
-
-    return container;
-  }
-
-  #bootstrapAndMount() {
-    const progressContainer = this.#container.querySelector(".anuncio-progress-container")!;
+    container.append(configOptions.closeButton);
 
     for (const item of this.items.values()) {
       progressContainer.appendChild(item.progressEl);
-      this.#container.appendChild(item.mediaEl);
+      container.appendChild(item.mediaEl);
     }
-
-    // this calls the setter and set the order of the progress elements
+    // this calls the setter and sets the order of the progress elements
     this.order = this.#order;
 
-    this.#container.append(this.#loader);
+    container.append(configOptions.loader);
 
-    document.body.appendChild(this.#container);
+    return container;
   }
 
   showCurrentItem() {
@@ -130,9 +143,9 @@ class Anuncio {
 
   async start() {
     if (this.#state === "closed") {
-      this.#container.style.display = "block";
+      this.container.style.display = "block";
 
-      await Fullscreen.tryEnter(this.#container);
+      await Fullscreen.tryEnter(this.container, this.nativeFullScreen);
       this.#currentIndex = 0;
 
       this.#state = "playing";
@@ -143,12 +156,12 @@ class Anuncio {
 
   close() {
     if (this.#state === "playing") {
-      Fullscreen.tryLeave(this.#container);
+      Fullscreen.tryLeave(this.container, this.nativeFullScreen);
 
       this.#state = "closed";
       this.closeCurrentItem();
       this.#currentIndex = -1;
-      this.#container.style.display = "none";
+      this.container.style.display = "none";
     }
   }
 
@@ -200,10 +213,7 @@ class Anuncio {
     this.items = null;
 
     // @ts-expect-error cleanup
-    this.#loader = null;
-
-    // @ts-expect-error cleanup
-    this.#container = null;
+    this.container = null;
 
     this.#state = "destroyed";
   }

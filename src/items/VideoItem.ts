@@ -1,9 +1,10 @@
+import { AnuncioProgress } from "src/utils";
 import { VideoOptions } from "../types";
 import { Item } from "./item";
 
 export class VideoItem extends Item {
   mediaEl: HTMLVideoElement;
-  progressEl: HTMLProgressElement;
+  progress: AnuncioProgress;
 
   #id: VideoOptions["id"];
   #state: "playing" | "paused" | "play-queued" | "closed" = "closed";
@@ -13,12 +14,16 @@ export class VideoItem extends Item {
     super();
     this.#id = options.id;
 
-    this.progressEl = this.#createProgressEl();
-    this.mediaEl = this.#createVideoEl(options.videoUrl, this.progressEl);
+    this.progress = new AnuncioProgress({ id: "anuncio-progress-for-" + this.#id });
+    this.mediaEl = this.#createVideoEl(options.videoUrl);
   }
 
   get loading() {
     return this.mediaEl.dataset.loading === "true";
+  }
+
+  get progressEl() {
+    return this.progress.element;
   }
 
   get id() {
@@ -33,18 +38,7 @@ export class VideoItem extends Item {
     return this.#state;
   }
 
-  #createProgressEl() {
-    const progress = document.createElement("progress");
-
-    progress.id = "anuncio-progress-for-" + this.#id;
-    progress.classList.add("anuncio-progress-element");
-    progress.max = 100;
-    progress.value = 0;
-
-    return progress;
-  }
-
-  #createVideoEl(videoUrl: string, progressEl: HTMLProgressElement) {
+  #createVideoEl(videoUrl: string) {
     const video = document.createElement("video");
     video.src = videoUrl;
     video.dataset.loading = "true";
@@ -64,10 +58,8 @@ export class VideoItem extends Item {
     });
 
     video.addEventListener("timeupdate", () => {
-      if (!progressEl.getAttribute("max")) {
-        progressEl.setAttribute("max", video.duration.toString());
-      }
-      progressEl.value = video.currentTime;
+      if (this.progress.max !== video.duration) this.progress.max = video.duration;
+      this.progress.value = video.currentTime;
     });
 
     return video;
@@ -80,7 +72,7 @@ export class VideoItem extends Item {
     this.mediaEl.pause();
     this.mediaEl.currentTime = 0;
 
-    this.progressEl.value = 0;
+    this.progress.value = 0;
   }
 
   pause() {

@@ -1,5 +1,8 @@
 export const Fullscreen = {
-  tryEnter(el: HTMLDivElement) {
+  tryEnter(el: HTMLDivElement, nativeFullScreen: boolean) {
+    if (!nativeFullScreen) {
+      return el.classList.add("anuncio-span-full-screen");
+    }
     if (this.getCurrentFullScreenElement()) return;
 
     if ("requestFullscreen" in el && typeof el.requestFullscreen == "function") {
@@ -12,8 +15,12 @@ export const Fullscreen = {
       return el.msRequestFullscreen();
     }
   },
-  tryLeave(element: Element) {
-    if (this.getCurrentFullScreenElement() !== element) return;
+  tryLeave(el: Element, nativeFullScreen: boolean) {
+    if (!nativeFullScreen) {
+      return el.classList.remove("anuncio-span-full-screen");
+    }
+
+    if (this.getCurrentFullScreenElement() !== el) return;
 
     if ("exitFullscreen" in document && typeof document.exitFullscreen == "function") {
       return document.exitFullscreen();

@@ -8,14 +8,15 @@ layout {
             plugin location="zellij:compact-bar"
         }
         floating_panes {
-            pane command="ranger" {
+            pane command="ranger" name="ranger" {
+                args "-r" "/home/vt/.config/ranger-zellij"
                 start_suspended false
                 height 30
                 width 120
                 x 151
                 y 10
             }
-            pane {
+            pane name="fish" {
                 height 30
                 width 120
                 x 20

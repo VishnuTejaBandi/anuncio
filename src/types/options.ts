@@ -21,6 +21,8 @@ export type AnuncioConfigOptions = {
   containerId?: string;
   order?: (ImageItem["id"] | VideoItem["id"])[];
   autostart?: boolean;
+  closeButton?: HTMLElement;
+  nativeFullScreen?: boolean;
 };
 
 export type AnuncioItemOptions = VideoOptions | ImageOptions;
