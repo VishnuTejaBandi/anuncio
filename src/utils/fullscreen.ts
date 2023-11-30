@@ -15,6 +15,7 @@ export const Fullscreen = {
       return el.msRequestFullscreen();
     }
   },
+  
   tryLeave(el: Element, nativeFullScreen: boolean) {
     if (!nativeFullScreen) {
       return el.classList.remove("anuncio-span-full-screen");

@@ -1,20 +1,21 @@
-import "./utils/progress";
 import { ImageItem } from "./items/ImageItem";
 import { VideoItem } from "./items/VideoItem";
 import { AnuncioConfigOptions, AnuncioItemMap, AnuncioItemOptions } from "./types";
-import { Fullscreen, generateUniqueId } from "./utils";
+import { Fullscreen, Validator, generateUniqueId } from "./utils";
 
 class Anuncio {
   autostart: boolean;
-  items: AnuncioItemMap;
-
   container: HTMLDivElement;
-  #currentIndex: number = -1;
-  #order: (ImageItem["id"] | VideoItem["id"])[];
-  #state: "playing" | "closed" | "destroyed" | "paused" = "closed";
   nativeFullScreen: boolean;
 
-  constructor(itemOptions: AnuncioItemOptions[], configOptions: AnuncioConfigOptions) {
+  #currentIndex: number = -1;
+  #items: AnuncioItemMap;
+  #order: (ImageItem["id"] | VideoItem["id"])[];
+  #state: "playing" | "closed" | "destroyed" | "paused" = "closed";
+
+  constructor(itemOptionsList: AnuncioItemOptions[], configOptions: AnuncioConfigOptions) {
+    Validator.validateItemOptions(itemOptionsList);
+
     const containerId = configOptions.containerId ?? generateUniqueId();
     const loader = configOptions.loader ?? this.#createLoader(containerId);
     const closeButton = configOptions.closeButton ?? this.#createCloseButton(containerId);
@@ -23,8 +24,8 @@ class Anuncio {
 
     this.nativeFullScreen = configOptions.nativeFullScreen ?? false;
     this.autostart = configOptions.autostart ?? true;
-    this.items = this.#createItemMap(itemOptions);
-    this.#order = configOptions.order ?? Array.from(this.items.keys());
+    this.#items = this.#createItemMap(itemOptionsList);
+    this.#order = configOptions.order ?? Array.from(this.#items.keys());
 
     this.container = this.#createContainer(configOptionsWithDefaults);
     document.body.appendChild(this.container);
@@ -38,6 +39,16 @@ class Anuncio {
     return this.#order;
   }
 
+  get items(): Record<string, ImageItem | VideoItem> {
+    return Object.fromEntries(this.#items.entries());
+  }
+
+  get currentItem() {
+    if (this.#currentIndex >= 0 && this.#currentIndex < this.#items.size) {
+      return this.#items.get(this.#order[this.#currentIndex]);
+    }
+  }
+
   set order(newOrder) {
     if (this.#state !== "closed") {
       throw new Error("Order cannot be set when anuncio is " + this.#state);
@@ -45,15 +56,9 @@ class Anuncio {
 
     this.#order = newOrder;
     this.#order.forEach((itemId, index) => {
-      const item = this.items.get(itemId);
+      const item = this.#items.get(itemId);
       if (item) item.progressEl.style.order = index.toString();
     });
-  }
-
-  get currentItem() {
-    if (this.#currentIndex >= 0 && this.#currentIndex < this.items.size) {
-      return this.items.get(this.#order[this.#currentIndex]);
-    }
   }
 
   #createItemMap(itemOptions: AnuncioItemOptions[]): AnuncioItemMap {
@@ -86,7 +91,11 @@ class Anuncio {
 
   #createCloseButton(containerId: string) {
     const button = document.createElement("button");
-    button.innerText = "X";
+    button.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" >
+      <path d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"/>
+    </svg>`;
+
     button.id = "anuncio-close-button-for-" + containerId;
     button.classList.add("anuncio-close-button");
 
@@ -100,34 +109,53 @@ class Anuncio {
     container.id = configOptions.containerId;
     container.classList.add("anuncio-container-element");
     container.style.display = "none";
-    container.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement) this.close();
-    });
 
     const progressContainer = document.createElement("div");
     progressContainer.classList.add("anuncio-progress-container");
     progressContainer.id = "anuncio-progress-container-" + container.id;
+
+    const overlayContainer = document.createElement("div");
+    overlayContainer.classList.add("anuncio-overlay-container");
+    overlayContainer.id = "anuncio-overlay-container-" + container.id;
+
+    // Items in dom will be in this order
+    // container
+    //   progressContainer
+    //   closeButton
+    //   mediaElements
+    //   overlayContainer
+    //   loader
     container.append(progressContainer);
+    container.append(configOptions.closeButton);
+    for (const item of this.#items.values()) {
+      item.mediaEl.style.display = "none";
+      container.appendChild(item.mediaEl);
+
+      if (item.overlayEl) {
+        overlayContainer.appendChild(item.overlayEl);
+        item.overlayEl.style.display = "none";
+      }
+      progressContainer.appendChild(item.progressEl);
+    }
+    // this calls the setter and sets the order of the progress elements
+    this.order = this.#order;
+    container.append(overlayContainer);
+    container.append(configOptions.loader);
+
+    container.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) this.close();
+    });
 
     configOptions.closeButton.addEventListener("click", () => {
       this.close();
     });
-    container.append(configOptions.closeButton);
-
-    for (const item of this.items.values()) {
-      progressContainer.appendChild(item.progressEl);
-      container.appendChild(item.mediaEl);
-    }
-    // this calls the setter and sets the order of the progress elements
-    this.order = this.#order;
-
-    container.append(configOptions.loader);
 
     return container;
   }
 
   showCurrentItem() {
     if (this.currentItem) {
+      if (this.currentItem.overlayEl) this.currentItem.overlayEl.style.display = "block";
       this.currentItem.mediaEl.style.display = "block";
       this.currentItem.mediaEl.classList.add("active-anuncio-item");
     }
@@ -135,9 +163,13 @@ class Anuncio {
 
   closeCurrentItem() {
     if (this.currentItem) {
+      this.currentItem.progress.value = this.currentItem.progress.max;
+
       this.currentItem.close();
       this.currentItem.mediaEl.style.display = "none";
       this.currentItem.mediaEl.classList.remove("active-anuncio-item");
+
+      if (this.currentItem.overlayEl) this.currentItem.overlayEl.style.display = "none";
     }
   }
 
@@ -155,13 +187,17 @@ class Anuncio {
   }
 
   close() {
-    if (this.#state === "playing") {
+    if (this.#state === "playing" || this.#state === "paused") {
       Fullscreen.tryLeave(this.container, this.nativeFullScreen);
 
       this.#state = "closed";
       this.closeCurrentItem();
       this.#currentIndex = -1;
       this.container.style.display = "none";
+
+      for (const item of this.#items.values()) {
+        item.progress.value = 0;
+      }
     }
   }
 
@@ -187,30 +223,30 @@ class Anuncio {
   }
 
   playNextItem() {
-    this.closeCurrentItem();
+    if (this.#state === "playing") {
+      this.closeCurrentItem();
 
-    if (this.#currentIndex < this.items.size - 1! && this.#state !== "destroyed") {
-      this.#currentIndex += 1;
-      this.#playCurrentItem();
-    } else {
-      this.close();
-      return;
+      if (this.#currentIndex < this.#items.size - 1) {
+        this.#currentIndex += 1;
+        this.#playCurrentItem();
+      } else this.close();
     }
   }
 
   playPreviousItem() {
-    this.closeCurrentItem();
-
-    if (this.#currentIndex >= 0 && this.#state !== "destroyed") {
-      this.#currentIndex -= 1;
-      this.#playCurrentItem();
+    if (this.#state === "playing") {
+      if (this.#currentIndex > 0) {
+        this.closeCurrentItem();
+        this.#currentIndex -= 1;
+        this.#playCurrentItem();
+      }
     }
   }
 
   destroy() {
     this.currentItem?.close();
     // @ts-expect-error cleanup
-    this.items = null;
+    this.#items = null;
 
     // @ts-expect-error cleanup
     this.container = null;

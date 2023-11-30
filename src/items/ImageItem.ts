@@ -7,6 +7,7 @@ let imagePlayerInterval: Interval | null = null;
 export class ImageItem extends Item {
   mediaEl: HTMLImageElement;
   progress: AnuncioProgress;
+  overlayEl?: HTMLElement;
 
   #duration: ImageOptions["duration"];
   #id: ImageOptions["id"];
@@ -17,6 +18,7 @@ export class ImageItem extends Item {
     super();
     this.#id = options.id;
     this.#duration = options.duration ?? 5;
+    this.overlayEl = options.overlay;
 
     this.progress = new AnuncioProgress({ id: "anuncio-progress-for-" + this.#id, max: 100 });
     this.mediaEl = this.#createImageEl(options.imageUrl);
@@ -59,8 +61,6 @@ export class ImageItem extends Item {
   close() {
     this.#state = "closed";
 
-    this.progress.value = 0;
-
     // garbage collect interval
     imagePlayerInterval?.destroy();
     imagePlayerInterval = null;
@@ -85,6 +85,7 @@ export class ImageItem extends Item {
       this.#state = "play-queued";
     } else if (this.#state === "closed" || this.#state === "play-queued") {
       this.#state = "playing";
+      this.progress.value = 0;
 
       imagePlayerInterval = new Interval(
         this.#duration * 1000,

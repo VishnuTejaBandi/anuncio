@@ -1,72 +1,152 @@
 .anuncio-container-element {
-  &.anuncio-span-full-screen {
-    position: absolute;
-    height: 100dvh;
-    width: 100dvw;
-    top: 0;
-    left: 0;
-    z-index: 2147483647;
-    background: black;
-  }
+  --close-button-fill: white;
+  --close-button-z-index: 20;
+  --contianer-z-index: 2147483647;
+  --loader-z-index: 20;
+  --media-element-z-index: 0;
+  --overlay-container-z-index: 10;
+  --overlay-content-padding: 10px;
+  --progress-bar-border-radius: 3px;
+  --progress-bar-color: green;
+  --progress-bar-height: 3px;
+  --progress-bar-spacing: 10px;
+  --progress-container-z-index: 1;
 
   * {
     box-sizing: border-box;
   }
   position: relative;
-  display: none;
+
+  &.anuncio-span-full-screen {
+    background: black;
+    height: 100dvh;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100dvw;
+    z-index: var(--contianer-z-index);
+  }
 
   .anuncio-close-button {
+    all: unset;
+
+    cursor: pointer;
+    height: 20px;
     position: absolute;
-    top: 50px;
-    right: 50px;
-    z-index: 100;
+    right: 10px;
+    top: 25px;
+    width: 20px;
+    z-index: 20;
+    svg {
+      height: 100%;
+      fill: var(--close-button-fill);
+    }
   }
 
   video,
   img {
-    display: none;
     height: 100%;
     width: 100%;
+    z-index: var(--media-element-z-index);
   }
 
   .active-anuncio-item[data-loading="true"] {
     & ~ div.anuncio-loader-element {
+      animation:
+        l20-1 0.8s infinite linear alternate,
+        l20-2 1.6s infinite linear;
+      aspect-ratio: 1;
+      border: 3px solid green;
+      border-radius: 50%;
+      height: 20px;
+      left: 10px;
       position: absolute;
-      width: 50px;
-      height: 50px;
-      background: red;
-      top: 0;
-      left: 0;
+      top: 25px;
+      width: 20px;
+
+      @keyframes l20-1 {
+        0% {
+          clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
+        }
+        12.5% {
+          clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
+        }
+        25% {
+          clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 100% 100%, 100% 100%);
+        }
+        50% {
+          clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%);
+        }
+        62.5% {
+          clip-path: polygon(50% 50%, 100% 0, 100% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%);
+        }
+        75% {
+          clip-path: polygon(50% 50%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 50% 100%, 0% 100%);
+        }
+        100% {
+          clip-path: polygon(50% 50%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 0% 100%);
+        }
+      }
+
+      @keyframes l20-2 {
+        0% {
+          transform: scaleY(1) rotate(0deg);
+        }
+        49.99% {
+          transform: scaleY(1) rotate(135deg);
+        }
+        50% {
+          transform: scaleY(-1) rotate(0deg);
+        }
+        100% {
+          transform: scaleY(-1) rotate(-135deg);
+        }
+      }
+      z-index: var(--loader-z-index);
     }
   }
 
   .anuncio-progress-container {
+    align-items: center;
+    display: flex;
+    gap: var(--progress-bar-spacing);
+    justify-content: space-evenly;
+    left: 0px;
+    margin-top: var(--progress-bar-spacing);
+    padding: 0px var(--progress-bar-spacing);
     position: absolute;
     top: 0px;
-    left: 0px;
     width: 100%;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    gap: 10px;
-    padding: 0px 10px;
-    margin-top: 10px;
+    z-index: var(--progress-container-z-index);
 
     .anuncio-progress-element {
-      flex: 1 1;
-      position: relative;
       background: white;
-      height: 3px;
-      border-radius: 3px;
+      border-radius: var(--progress-bar-border-radius);
+      flex: 1 1;
+      height: var(--progress-bar-height);
       overflow: hidden;
+      position: relative;
 
       &::before {
+        background: var(--progress-bar-color);
         content: "";
-        background: green;
-        position: absolute;
         height: 100%;
+        position: absolute;
         width: var(--progress-percentage);
       }
     }
+  }
+
+  .anuncio-overlay-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: flex-end;
+    left: 0;
+    padding: var(--overlay-content-padding);
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: var(--overlay-container-z-index);
   }
 }

@@ -1,29 +1,58 @@
-import { AnuncioItemOptions } from "src/types";
+import type { AnuncioItemOptions, ImageOptions, VideoOptions, CommonOptions } from "src/types";
 
 export const Validator = {
-  validateItems(items: AnuncioItemOptions[]) {
-    if (!Array.isArray(items)) throw new Error("Options must be an array");
+  validateItemOptions(itemOptionsList: AnuncioItemOptions[]) {
+    if (!Array.isArray(itemOptionsList)) throw new Error("itemOptionsList must be an array");
 
-    items.forEach((item, index) => {
-      this.validateForNonEmptyString(item.id, new Error(`id at ${index} must be a non empty string`));
-      if (this.isNumeric(item.id)) throw new Error("Item id must be non numeric at index " + index);
+    itemOptionsList.forEach((itemOptions, index) => {
+      if (!this.isObject(itemOptions)) throw new Error(`invalid options at ${index}`);
 
-      if (item.type === "video")
-        this.validateForNonEmptyString(
-          item.videoUrl,
-          new Error(`videoUrl at index ${index} must be a non empty string`)
-        );
+      const { type } = itemOptions;
+      let error: string | null = this.validateCommonOptions(itemOptions);
 
-      if (item.type === "image")
-        this.validateForNonEmptyString(
-          item.imageUrl,
-          new Error(`imageUrl at index ${index} must be a non empty string`)
-        );
+      if (!error)
+        if (type === "image") {
+          error = Validator.validateImageOptions(itemOptions);
+        } else if (type === "video") {
+          error = Validator.validateVideoOptions(itemOptions);
+        } else {
+          error = `Unknown item type ${type}`;
+        }
+
+      if (error) {
+        throw new Error(`${error} at index ${index}`);
+      }
     });
   },
 
-  validateForNonEmptyString(item: unknown, error: Error) {
-    if (!this.isString(item) || item.length === 0) throw error;
+  validateCommonOptions(options: CommonOptions): string | null {
+    const { id, overlay } = options;
+
+    if (!this.validateForNonEmptyString(id)) return "id must be a string";
+
+    if (overlay !== undefined && !(overlay instanceof HTMLElement)) return "overlay if present must be a HTML element";
+
+    return null;
+  },
+
+  validateImageOptions(options: ImageOptions): string | null {
+    const { imageUrl, duration } = options;
+    if (!this.validateForNonEmptyString(imageUrl)) return "imageUrl is not a valid string";
+
+    if (!this.isNumber(duration) || duration <= 0) return "duration must be a positive integer";
+
+    return null;
+  },
+
+  validateVideoOptions(options: VideoOptions): string | null {
+    const { videoUrl } = options;
+    if (!this.validateForNonEmptyString(videoUrl)) return "videoUrl is not a valid string";
+
+    return null;
+  },
+
+  validateForNonEmptyString(item: unknown) {
+    return this.isString(item) && item.length !== 0;
   },
 
   isNumber(x: unknown): x is number {
@@ -38,5 +67,9 @@ export const Validator = {
     if (typeof str === "number") return true;
     if (typeof str === "string") return Number.isFinite(parseFloat(str));
     return false;
+  },
+
+  isObject(item: unknown) {
+    return typeof item === "object" && item !== null;
   },
 };

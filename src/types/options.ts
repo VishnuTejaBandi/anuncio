@@ -1,7 +1,7 @@
 import { ImageItem } from "src/items/ImageItem";
 import { VideoItem } from "src/items/VideoItem";
 
-export type CommonOptions = { id: string };
+export type CommonOptions = { id: string; overlay?: HTMLElement };
 
 export type ImageOptions = CommonOptions & {
   imageUrl: string;

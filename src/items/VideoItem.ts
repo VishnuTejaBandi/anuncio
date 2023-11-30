@@ -5,6 +5,7 @@ import { Item } from "./item";
 export class VideoItem extends Item {
   mediaEl: HTMLVideoElement;
   progress: AnuncioProgress;
+  overlayEl?: HTMLElement;
 
   #id: VideoOptions["id"];
   #state: "playing" | "paused" | "play-queued" | "closed" = "closed";
@@ -13,8 +14,9 @@ export class VideoItem extends Item {
   constructor(options: VideoOptions) {
     super();
     this.#id = options.id;
+    this.overlayEl = options.overlay;
 
-    this.progress = new AnuncioProgress({ id: "anuncio-progress-for-" + this.#id });
+    this.progress = new AnuncioProgress({ id: "anuncio-progress-for-" + this.#id, max: 100 });
     this.mediaEl = this.#createVideoEl(options.videoUrl);
   }
 
@@ -45,7 +47,8 @@ export class VideoItem extends Item {
     video.id = "anuncio-video-for-" + this.#id;
 
     video.addEventListener("canplay", () => {
-      if (this.#state === "play-queued") this.mediaEl.play();
+      if (this.#state === "play-queued") this.resume();
+
       video.dataset.loading = "false";
     });
 
@@ -58,21 +61,16 @@ export class VideoItem extends Item {
     });
 
     video.addEventListener("timeupdate", () => {
-      if (this.progress.max !== video.duration) this.progress.max = video.duration;
-      this.progress.value = video.currentTime;
+      if (this.#state === "playing") this.progress.value = (video.currentTime * 100) / video.duration;
     });
 
     return video;
   }
 
   close() {
-    this.#state = "closed";
-
-    this.mediaEl.style.display = "none";
     this.mediaEl.pause();
     this.mediaEl.currentTime = 0;
-
-    this.progress.value = 0;
+    this.#state = "closed";
   }
 
   pause() {
@@ -83,7 +81,7 @@ export class VideoItem extends Item {
   }
 
   resume() {
-    if (this.#state === "paused") {
+    if (this.#state === "paused" || this.#state === "play-queued") {
       this.mediaEl.play();
       this.#state = "playing";
     }
@@ -93,8 +91,8 @@ export class VideoItem extends Item {
     if (this.#state === "closed" && this.loading) {
       this.#state = "play-queued";
     } else if (this.#state === "closed" || this.#state === "play-queued") {
-      this.#state = "playing";
-      this.mediaEl.play();
+      this.progress.value = 0;
+      this.resume();
     }
   }
 }
