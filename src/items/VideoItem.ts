@@ -47,7 +47,7 @@ export class VideoItem extends Item {
     video.id = "anuncio-video-for-" + this.#id;
 
     video.addEventListener("canplay", () => {
-      if (this.#state === "play-queued") this.resume();
+      if (this.#state === "play-queued") this.start();
 
       video.dataset.loading = "false";
     });
@@ -81,7 +81,7 @@ export class VideoItem extends Item {
   }
 
   resume() {
-    if (this.#state === "paused" || this.#state === "play-queued") {
+    if (this.#state === "paused") {
       this.mediaEl.play();
       this.#state = "playing";
     }
@@ -92,7 +92,8 @@ export class VideoItem extends Item {
       this.#state = "play-queued";
     } else if (this.#state === "closed" || this.#state === "play-queued") {
       this.progress.value = 0;
-      this.resume();
+      this.mediaEl.play();
+      this.#state = "playing";
     }
   }
 }
