@@ -1,11 +1,8 @@
-type ProgressOptions = {
-  max?: number;
-  id: string;
-};
+import { AnuncioProgress, ProgressOptions } from "src/types";
 
 const PROGRESS_CSS_VAR = "--progress-percentage" as const;
 
-export class AnuncioProgress {
+export class PAnuncioProgress implements AnuncioProgress {
   #value: number = 0;
   #max: number;
 
@@ -13,7 +10,7 @@ export class AnuncioProgress {
 
   constructor(options: ProgressOptions) {
     this.#max = options.max ?? 100;
-    this.element = this.createProgressElement(options.id);
+    this.element = this.#createProgressElement(options.id);
     // invokes the setter with value 0
     this.value = 0;
   }
@@ -39,7 +36,7 @@ export class AnuncioProgress {
     this.#max = max;
   }
 
-  createProgressElement(id: string) {
+  #createProgressElement(id: string) {
     const element = document.createElement("div");
     element.classList.add("anuncio-progress-element");
     element.id = id;

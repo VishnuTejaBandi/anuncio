@@ -1,0 +1,173 @@
+.anuncio-container-element {
+  --close-button-fill: white;
+  --close-button-z-index: 20;
+  --contianer-z-index: 2147483647;
+  --loader-z-index: 20;
+  --media-element-z-index: 0;
+  --mute-button-fill: white;
+  --mute-button-z-index: 20;
+  --overlay-container-z-index: 10;
+  --overlay-content-padding: 10px;
+  --progress-bar-border-radius: 3px;
+  --progress-bar-color: green;
+  --progress-bar-height: 3px;
+  --progress-bar-spacing: 10px;
+  --progress-container-z-index: 1;
+  position: relative;
+}
+.anuncio-container-element * {
+  box-sizing: border-box;
+}
+.anuncio-container-element.anuncio-span-full-screen {
+  background: black;
+  height: 100dvh;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100dvw;
+  z-index: var(--contianer-z-index);
+}
+.anuncio-container-element .anuncio-close-button {
+  all: unset;
+  cursor: pointer;
+  height: 20px;
+  position: absolute;
+  right: 10px;
+  top: 25px;
+  width: 20px;
+  z-index: var(--close-button-z-index);
+}
+.anuncio-container-element .anuncio-close-button svg {
+  height: 100%;
+  fill: var(--close-button-fill);
+}
+.anuncio-container-element video,
+.anuncio-container-element img {
+  height: 100%;
+  width: 100%;
+  z-index: var(--media-element-z-index);
+}
+.anuncio-container-element .active-anuncio-item[data-loading=true] ~ div.anuncio-loader-element {
+  animation: l20-1 0.8s infinite linear alternate, l20-2 1.6s infinite linear;
+  aspect-ratio: 1;
+  border: 6px solid green;
+  border-radius: 50%;
+  height: 50px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  z-index: var(--loader-z-index);
+}
+@keyframes l20-1 {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
+  }
+  12.5% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
+  }
+  25% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 100% 100%, 100% 100%);
+  }
+  50% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%);
+  }
+  62.5% {
+    clip-path: polygon(50% 50%, 100% 0, 100% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%);
+  }
+  75% {
+    clip-path: polygon(50% 50%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 50% 100%, 0% 100%);
+  }
+  100% {
+    clip-path: polygon(50% 50%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 0% 100%);
+  }
+}
+@keyframes l20-2 {
+  0% {
+    transform: scaleY(1) rotate(0deg);
+  }
+  49.99% {
+    transform: scaleY(1) rotate(135deg);
+  }
+  50% {
+    transform: scaleY(-1) rotate(0deg);
+  }
+  100% {
+    transform: scaleY(-1) rotate(-135deg);
+  }
+}
+.anuncio-container-element .anuncio-progress-container {
+  align-items: center;
+  display: flex;
+  gap: var(--progress-bar-spacing);
+  justify-content: space-evenly;
+  left: 0px;
+  margin-top: var(--progress-bar-spacing);
+  padding: 0px var(--progress-bar-spacing);
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  z-index: var(--progress-container-z-index);
+}
+.anuncio-container-element .anuncio-progress-container .anuncio-progress-element {
+  background: white;
+  border-radius: var(--progress-bar-border-radius);
+  flex: 1 1;
+  height: var(--progress-bar-height);
+  overflow: hidden;
+  position: relative;
+}
+.anuncio-container-element .anuncio-progress-container .anuncio-progress-element::before {
+  background: var(--progress-bar-color);
+  content: "";
+  height: 100%;
+  position: absolute;
+  width: var(--progress-percentage);
+}
+.anuncio-container-element .anuncio-overlay-container {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: flex-end;
+  left: 0;
+  padding: var(--overlay-content-padding);
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: var(--overlay-container-z-index);
+}
+.anuncio-container-element .anuncio-overlay-container * {
+  pointer-events: auto;
+}
+.anuncio-container-element .anuncio-mute-button {
+  cursor: pointer;
+  height: 20px;
+  position: absolute;
+  left: 10px;
+  top: 25px;
+  width: 20px;
+  z-index: var(--mute-button-z-index);
+}
+.anuncio-container-element .anuncio-mute-button svg {
+  height: 100%;
+  width: 100%;
+  display: none;
+}
+.anuncio-container-element .anuncio-mute-button svg path,
+.anuncio-container-element .anuncio-mute-button svg line {
+  stroke: var(--mute-button-fill);
+}
+.anuncio-container-element[data-muted=true] .anuncio-mute-button .unmute {
+  display: block;
+}
+.anuncio-container-element[data-muted=false] .anuncio-mute-button .mute {
+  display: block;
+}
+.anuncio-container-element img.active-anuncio-item ~ .anuncio-mute-button {
+  display: none;
+}
+
+/*# sourceMappingURL=index.css.map */

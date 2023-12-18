@@ -1,5 +1,8 @@
-import type { AnuncioItemOptions, ImageOptions, VideoOptions, CommonOptions } from "src/types";
+import type { AnuncioItemOptions, ImageOptions, VideoOptions, CommonOptions, AnuncioConfigOptions } from "src/types";
 
+/**
+ * @private
+ */
 export const Validator = {
   validateItemOptions(itemOptionsList: AnuncioItemOptions[]) {
     if (!Array.isArray(itemOptionsList)) throw new Error("itemOptionsList must be an array");
@@ -25,10 +28,55 @@ export const Validator = {
     });
   },
 
+  validateConfigOptions(options: AnuncioConfigOptions) {
+    if (!this.isObject(options)) throw new Error("invalid config options");
+
+    const {
+      autostart,
+      closeButton,
+      containerId,
+      loader,
+      nativeFullScreen,
+      muted,
+      defaultNavigation,
+      handleCloseButtonClick,
+      handleMuteButtonClick,
+    } = options;
+
+    if (autostart !== undefined && typeof autostart !== "boolean") throw new Error("autostart if present must be a valid boolean");
+
+    if (muted !== undefined && typeof muted !== "boolean") throw new Error("muted if present must be a valid boolean");
+
+    if (nativeFullScreen !== undefined && typeof nativeFullScreen !== "boolean")
+      throw new Error("nativeFullScreen if present must be a valid boolean");
+
+    if (defaultNavigation !== undefined && typeof defaultNavigation !== "boolean")
+      throw new Error("defaultNavigation if present must be a valid boolean");
+
+    if (handleCloseButtonClick !== undefined && typeof handleCloseButtonClick !== "boolean")
+      throw new Error("handleCloseButtonClick if present must be a valid boolean");
+
+    if (handleMuteButtonClick !== undefined && typeof handleMuteButtonClick !== "boolean")
+      throw new Error("handleMuteButtonClick if present must be a valid boolean");
+
+    if (closeButton !== undefined && !(closeButton instanceof HTMLElement))
+      throw new Error("closeButton if present must be a html element");
+
+    if (loader !== undefined && !(loader instanceof HTMLElement)) throw new Error("loader if present must be a html element");
+
+    if (containerId !== undefined && !this.validateForNonEmptyString(containerId))
+      throw new Error("containerId if present must be a non empty string");
+
+    if (containerId) {
+      options.containerId = containerId.replace(/ /g, "");
+    }
+  },
+
   validateCommonOptions(options: CommonOptions): string | null {
     const { id, overlay } = options;
 
     if (!this.validateForNonEmptyString(id)) return "id must be a string";
+    options.id = id.replace(/ /g, "");
 
     if (overlay !== undefined && !(overlay instanceof HTMLElement)) return "overlay if present must be a HTML element";
 
@@ -52,7 +100,7 @@ export const Validator = {
   },
 
   validateForNonEmptyString(item: unknown) {
-    return this.isString(item) && item.length !== 0;
+    return this.isString(item) && item.trim().length !== 0;
   },
 
   isNumber(x: unknown): x is number {

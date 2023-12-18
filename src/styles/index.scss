@@ -4,6 +4,8 @@
   --contianer-z-index: 2147483647;
   --loader-z-index: 20;
   --media-element-z-index: 0;
+  --mute-button-fill: white;
+  --mute-button-z-index: 20;
   --overlay-container-z-index: 10;
   --overlay-content-padding: 10px;
   --progress-bar-border-radius: 3px;
@@ -36,7 +38,7 @@
     right: 10px;
     top: 25px;
     width: 20px;
-    z-index: 20;
+    z-index: var(--close-button-z-index);
     svg {
       height: 100%;
       fill: var(--close-button-fill);
@@ -56,13 +58,14 @@
         l20-1 0.8s infinite linear alternate,
         l20-2 1.6s infinite linear;
       aspect-ratio: 1;
-      border: 3px solid green;
+      border: 6px solid green;
       border-radius: 50%;
-      height: 20px;
-      left: 10px;
+      height: 50px;
+      left: 50%;
       position: absolute;
-      top: 25px;
-      width: 20px;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
 
       @keyframes l20-1 {
         0% {
@@ -138,15 +141,64 @@
   }
 
   .anuncio-overlay-container {
+    align-items: flex-start;
     display: flex;
     flex-direction: column;
     height: 100%;
     justify-content: flex-end;
     left: 0;
     padding: var(--overlay-content-padding);
+    pointer-events: none;
     position: absolute;
     top: 0;
     width: 100%;
     z-index: var(--overlay-container-z-index);
+
+    * {
+      pointer-events: auto;
+    }
+  }
+
+  .anuncio-mute-button {
+    cursor: pointer;
+    height: 20px;
+    position: absolute;
+    left: 10px;
+    top: 25px;
+    width: 20px;
+    z-index: var(--mute-button-z-index);
+
+    svg {
+      height: 100%;
+      width: 100%;
+      display: none;
+
+      path,
+      line {
+        stroke: var(--mute-button-fill);
+      }
+    }
+  }
+
+  &[data-muted="true"] {
+    .anuncio-mute-button {
+      .unmute {
+        display: block;
+      }
+    }
+  }
+
+  &[data-muted="false"] {
+    .anuncio-mute-button {
+      .mute {
+        display: block;
+      }
+    }
+  }
+
+  img.active-anuncio-item {
+    & ~ .anuncio-mute-button {
+      display: none;
+    }
   }
 }

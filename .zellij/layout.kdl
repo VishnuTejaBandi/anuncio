@@ -16,7 +16,8 @@ layout {
                 x 151
                 y 10
             }
-            pane name="fish" {
+            pane name="fish" command="npm" {
+                args "run" "start:dev:watch"
                 height 30
                 width 120
                 x 20
@@ -41,6 +42,18 @@ layout {
                 y "25%"
             }
         }
+    }
+    tab name="docs" hide_floating_panes=true {
+        pane focus=true {
+            name "miniserve"
+            command "miniserve"
+            args  "--spa" "./docs/" "--index" "index.html"
+            start_suspended false
+        }        
+        pane size=1 borderless=true {
+            plugin location="zellij:compact-bar"
+        }
+
     }
     new_tab_template {
         pane

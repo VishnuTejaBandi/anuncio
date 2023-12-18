@@ -1,23 +1,25 @@
-import { AnuncioProgress } from "src/utils";
-import { VideoOptions } from "../types";
+import { PAnuncioProgress } from "src/utils";
+import { VideoItem, VideoOptions } from "../types";
 import { Item } from "./item";
 
-export class VideoItem extends Item {
+export class PVideoItem extends Item implements VideoItem {
   mediaEl: HTMLVideoElement;
-  progress: AnuncioProgress;
+  progress: PAnuncioProgress;
   overlayEl?: HTMLElement;
 
+  #muted: boolean = false;
   #id: VideoOptions["id"];
-  #state: "playing" | "paused" | "play-queued" | "closed" = "closed";
-  #type: "image" = "image" as const;
+  #state: VideoItem["state"] = "closed";
+  #type: "video" = "video" as const;
 
   constructor(options: VideoOptions) {
     super();
     this.#id = options.id;
     this.overlayEl = options.overlay;
 
-    this.progress = new AnuncioProgress({ id: "anuncio-progress-for-" + this.#id, max: 100 });
+    this.progress = new PAnuncioProgress({ id: "anuncio-progress-for-" + this.#id, max: 100 });
     this.mediaEl = this.#createVideoEl(options.videoUrl);
+    this.addNavigationEvents();
   }
 
   get loading() {
@@ -38,6 +40,19 @@ export class VideoItem extends Item {
 
   get state() {
     return this.#state;
+  }
+
+  get muted() {
+    return this.#muted;
+  }
+
+  set muted(value: boolean) {
+    this.mediaEl.muted = value;
+    this.#muted = value;
+  }
+
+  get duration() {
+    return this.mediaEl.duration;
   }
 
   #createVideoEl(videoUrl: string) {
@@ -69,7 +84,6 @@ export class VideoItem extends Item {
 
   close() {
     this.mediaEl.pause();
-    this.mediaEl.currentTime = 0;
     this.#state = "closed";
   }
 
@@ -91,6 +105,7 @@ export class VideoItem extends Item {
     if (this.#state === "closed" && this.loading) {
       this.#state = "play-queued";
     } else if (this.#state === "closed" || this.#state === "play-queued") {
+      this.mediaEl.currentTime = 0;
       this.progress.value = 0;
       this.mediaEl.play();
       this.#state = "playing";

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./src/index.ts"
+  ],
+  "categorizeByGroup": false,
+  "plugin": [
+    "@mxssfd/typedoc-theme"
+  ],
+  "theme": "my-theme",
+  "includeVersion": true,
+  "readme": "none"
+}
