@@ -57,7 +57,7 @@ export declare class Anuncio {
      * @param { (AnuncioItemOptions[]) } itemOptionsList  list of options for video or image
      * @param { AnuncioConfigOptions } configOptions  configuration for anuncio
      */
-    constructor(itemOptionsList: AnuncioItemOptions[], configOptions: AnuncioConfigOptions);
+    constructor(itemOptionsList: AnuncioItemOptions[], configOptions?: AnuncioConfigOptions);
     /**
      * Get the container for the instance.\
      * Mutating this is not advised, may lead to undefined behaviour.

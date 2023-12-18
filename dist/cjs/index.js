@@ -73,6 +73,8 @@ const Validator = {
         });
     },
     validateConfigOptions(options) {
+        if (!options)
+            return;
         if (!this.isObject(options))
             throw new Error("invalid config options");
         const { autostart, closeButton, containerId, loader, nativeFullScreen, muted, defaultNavigation, handleCloseButtonClick, handleMuteButtonClick, } = options;
@@ -604,28 +606,28 @@ class Anuncio {
         _Anuncio_maxProgressTrackers.set(this, {});
         Validator.validateItemOptions(itemOptionsList);
         Validator.validateConfigOptions(configOptions);
-        const containerId = (_a = configOptions.containerId) !== null && _a !== void 0 ? _a : generateUniqueId();
-        const loader = (_b = configOptions.loader) !== null && _b !== void 0 ? _b : __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createLoader).call(this, containerId);
-        const closeButton = (_c = configOptions.closeButton) !== null && _c !== void 0 ? _c : __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createCloseButton).call(this, containerId);
-        const root = (_d = configOptions.root) !== null && _d !== void 0 ? _d : document.body;
-        const muteButton = (_e = configOptions.muteButton) !== null && _e !== void 0 ? _e : __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createMuteButton).call(this, containerId);
-        const handleMuteButtonClick = (_f = configOptions.handleMuteButtonClick) !== null && _f !== void 0 ? _f : true;
-        const defaultNavigation = (_g = configOptions.defaultNavigation) !== null && _g !== void 0 ? _g : true;
-        const handleCloseButtonClick = (_h = configOptions.handleCloseButtonClick) !== null && _h !== void 0 ? _h : true;
-        const configOptionsWithDefaults = Object.assign(Object.assign({}, configOptions), { containerId,
+        const containerId = (_a = configOptions === null || configOptions === void 0 ? void 0 : configOptions.containerId) !== null && _a !== void 0 ? _a : generateUniqueId();
+        const loader = (_b = configOptions === null || configOptions === void 0 ? void 0 : configOptions.loader) !== null && _b !== void 0 ? _b : __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createLoader).call(this, containerId);
+        const closeButton = (_c = configOptions === null || configOptions === void 0 ? void 0 : configOptions.closeButton) !== null && _c !== void 0 ? _c : __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createCloseButton).call(this, containerId);
+        const root = (_d = configOptions === null || configOptions === void 0 ? void 0 : configOptions.root) !== null && _d !== void 0 ? _d : document.body;
+        const muteButton = (_e = configOptions === null || configOptions === void 0 ? void 0 : configOptions.muteButton) !== null && _e !== void 0 ? _e : __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createMuteButton).call(this, containerId);
+        const handleMuteButtonClick = (_f = configOptions === null || configOptions === void 0 ? void 0 : configOptions.handleMuteButtonClick) !== null && _f !== void 0 ? _f : true;
+        const defaultNavigation = (_g = configOptions === null || configOptions === void 0 ? void 0 : configOptions.defaultNavigation) !== null && _g !== void 0 ? _g : true;
+        const handleCloseButtonClick = (_h = configOptions === null || configOptions === void 0 ? void 0 : configOptions.handleCloseButtonClick) !== null && _h !== void 0 ? _h : true;
+        const configOptionsWithDefaults = Object.assign(Object.assign({}, (configOptions !== null && configOptions !== void 0 ? configOptions : {})), { containerId,
             loader,
             closeButton,
             muteButton,
             handleMuteButtonClick,
             handleCloseButtonClick,
             defaultNavigation });
-        this.nativeFullScreen = (_j = configOptions.nativeFullScreen) !== null && _j !== void 0 ? _j : false;
-        this.autostart = (_k = configOptions.autostart) !== null && _k !== void 0 ? _k : true;
+        this.nativeFullScreen = (_j = configOptions === null || configOptions === void 0 ? void 0 : configOptions.nativeFullScreen) !== null && _j !== void 0 ? _j : false;
+        this.autostart = (_k = configOptions === null || configOptions === void 0 ? void 0 : configOptions.autostart) !== null && _k !== void 0 ? _k : true;
         __classPrivateFieldSet(this, _Anuncio_items, __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createItemMap).call(this, itemOptionsList), "f");
-        __classPrivateFieldSet(this, _Anuncio_order, (_l = configOptions.order) !== null && _l !== void 0 ? _l : Array.from(__classPrivateFieldGet(this, _Anuncio_items, "f").keys()), "f");
+        __classPrivateFieldSet(this, _Anuncio_order, (_l = configOptions === null || configOptions === void 0 ? void 0 : configOptions.order) !== null && _l !== void 0 ? _l : Array.from(__classPrivateFieldGet(this, _Anuncio_items, "f").keys()), "f");
         __classPrivateFieldSet(this, _Anuncio_container, __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_createContainer).call(this, configOptionsWithDefaults), "f");
         // invokes the muted setter, this line must be after container is defined
-        this.muted = (_m = configOptions.muted) !== null && _m !== void 0 ? _m : false;
+        this.muted = (_m = configOptions === null || configOptions === void 0 ? void 0 : configOptions.muted) !== null && _m !== void 0 ? _m : false;
         root.appendChild(__classPrivateFieldGet(this, _Anuncio_container, "f"));
         AnuncioInstances.set(containerId, this);
     }

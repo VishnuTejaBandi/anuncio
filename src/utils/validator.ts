@@ -28,7 +28,8 @@ export const Validator = {
     });
   },
 
-  validateConfigOptions(options: AnuncioConfigOptions) {
+  validateConfigOptions(options: AnuncioConfigOptions | undefined) {
+    if (!options) return;
     if (!this.isObject(options)) throw new Error("invalid config options");
 
     const {

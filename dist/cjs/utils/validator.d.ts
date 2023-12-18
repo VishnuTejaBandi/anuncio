@@ -4,7 +4,7 @@ import type { AnuncioItemOptions, ImageOptions, VideoOptions, CommonOptions, Anu
  */
 export declare const Validator: {
     validateItemOptions(itemOptionsList: AnuncioItemOptions[]): void;
-    validateConfigOptions(options: AnuncioConfigOptions): void;
+    validateConfigOptions(options: AnuncioConfigOptions | undefined): void;
     validateCommonOptions(options: CommonOptions): string | null;
     validateImageOptions(options: ImageOptions): string | null;
     validateVideoOptions(options: VideoOptions): string | null;

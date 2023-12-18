@@ -82,21 +82,21 @@ export class Anuncio {
    * @param { (AnuncioItemOptions[]) } itemOptionsList  list of options for video or image
    * @param { AnuncioConfigOptions } configOptions  configuration for anuncio
    */
-  constructor(itemOptionsList: AnuncioItemOptions[], configOptions: AnuncioConfigOptions) {
+  constructor(itemOptionsList: AnuncioItemOptions[], configOptions?: AnuncioConfigOptions) {
     Validator.validateItemOptions(itemOptionsList);
     Validator.validateConfigOptions(configOptions);
 
-    const containerId = configOptions.containerId ?? generateUniqueId();
-    const loader = configOptions.loader ?? this.#createLoader(containerId);
-    const closeButton = configOptions.closeButton ?? this.#createCloseButton(containerId);
-    const root = configOptions.root ?? document.body;
-    const muteButton = configOptions.muteButton ?? this.#createMuteButton(containerId);
-    const handleMuteButtonClick = configOptions.handleMuteButtonClick ?? true;
-    const defaultNavigation = configOptions.defaultNavigation ?? true;
-    const handleCloseButtonClick = configOptions.handleCloseButtonClick ?? true;
+    const containerId = configOptions?.containerId ?? generateUniqueId();
+    const loader = configOptions?.loader ?? this.#createLoader(containerId);
+    const closeButton = configOptions?.closeButton ?? this.#createCloseButton(containerId);
+    const root = configOptions?.root ?? document.body;
+    const muteButton = configOptions?.muteButton ?? this.#createMuteButton(containerId);
+    const handleMuteButtonClick = configOptions?.handleMuteButtonClick ?? true;
+    const defaultNavigation = configOptions?.defaultNavigation ?? true;
+    const handleCloseButtonClick = configOptions?.handleCloseButtonClick ?? true;
 
     const configOptionsWithDefaults = {
-      ...configOptions,
+      ...(configOptions ?? {}),
       containerId,
       loader,
       closeButton,
@@ -106,14 +106,14 @@ export class Anuncio {
       defaultNavigation,
     };
 
-    this.nativeFullScreen = configOptions.nativeFullScreen ?? false;
-    this.autostart = configOptions.autostart ?? true;
+    this.nativeFullScreen = configOptions?.nativeFullScreen ?? false;
+    this.autostart = configOptions?.autostart ?? true;
     this.#items = this.#createItemMap(itemOptionsList);
-    this.#order = configOptions.order ?? Array.from(this.#items.keys());
+    this.#order = configOptions?.order ?? Array.from(this.#items.keys());
     this.#container = this.#createContainer(configOptionsWithDefaults);
 
     // invokes the muted setter, this line must be after container is defined
-    this.muted = configOptions.muted ?? false;
+    this.muted = configOptions?.muted ?? false;
 
     root.appendChild(this.#container);
 
