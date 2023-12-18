@@ -3,8 +3,6 @@
  *
  * @module
  */
-import { PImageItem } from "./items/ImageItem";
-import { PVideoItem } from "./items/VideoItem";
 import type { ImageItem, VideoItem, AnuncioConfigOptions, AnuncioItemOptions, AnuncioEventType, AnuncioEventListenerMap } from "./types";
 export * from "./types";
 /**
@@ -87,7 +85,7 @@ export declare class Anuncio {
     /**
      * Get the current item. Mutation is not advised.
      */
-    get currentItem(): PImageItem | PVideoItem | null;
+    get currentItem(): ImageItem | VideoItem | null;
     /**
      * is anuncio muted now ?
      */

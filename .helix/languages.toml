@@ -4,6 +4,13 @@ language-servers = [ { name = "typescript-language-server", except-features = [ 
 formatter = { command = 'prettier', args = ["--stdin-filepath", "a.ts"] }
 auto-format = true
 
+[[language]]
+name = "javascript"
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] } ,"eslint"]
+formatter = { command = 'prettier', args = ["--stdin-filepath", "a.js"] }
+auto-format = true
+
+
 
 [[language]]
 name = "css"
