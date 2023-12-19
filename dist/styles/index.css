@@ -2,6 +2,7 @@
   --close-button-fill: white;
   --close-button-z-index: 20;
   --contianer-z-index: 2147483647;
+  --loader-color: green;
   --loader-z-index: 20;
   --media-element-z-index: 0;
   --mute-button-fill: white;
@@ -50,7 +51,7 @@
 .anuncio-container-element .active-anuncio-item[data-loading=true] ~ div.anuncio-loader-element {
   animation: l20-1 0.8s infinite linear alternate, l20-2 1.6s infinite linear;
   aspect-ratio: 1;
-  border: 6px solid green;
+  border: 6px solid var(--loader-color);
   border-radius: 50%;
   height: 50px;
   left: 50%;

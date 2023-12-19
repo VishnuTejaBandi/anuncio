@@ -721,6 +721,7 @@ class Anuncio {
                 this.currentItem.overlayEl.style.display = "block";
             this.currentItem.mediaEl.style.display = "block";
             this.currentItem.mediaEl.classList.add("active-anuncio-item");
+            this.currentItem.progressEl.classList.add("active-progress-item");
         }
     }
     /**
@@ -731,6 +732,7 @@ class Anuncio {
         if (this.currentItem) {
             __classPrivateFieldGet(this, _Anuncio_maxProgressTrackers, "f")[this.currentItem.id] = Math.max((_a = __classPrivateFieldGet(this, _Anuncio_maxProgressTrackers, "f")[this.currentItem.id]) !== null && _a !== void 0 ? _a : 0, this.currentItem.progress.value);
             this.currentItem.progress.value = this.currentItem.progress.max;
+            this.currentItem.progressEl.classList.remove("active-progress-item");
             this.currentItem.close();
             this.currentItem.mediaEl.style.display = "none";
             this.currentItem.mediaEl.classList.remove("active-anuncio-item");

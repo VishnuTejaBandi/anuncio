@@ -374,6 +374,7 @@ export class Anuncio {
       if (this.currentItem.overlayEl) this.currentItem.overlayEl.style.display = "block";
       this.currentItem.mediaEl.style.display = "block";
       this.currentItem.mediaEl.classList.add("active-anuncio-item");
+      this.currentItem.progressEl.classList.add("active-progress-item");
     }
   }
 
@@ -387,6 +388,7 @@ export class Anuncio {
         this.currentItem.progress.value
       );
       this.currentItem.progress.value = this.currentItem.progress.max;
+      this.currentItem.progressEl.classList.remove("active-progress-item");
 
       this.currentItem.close();
       this.currentItem.mediaEl.style.display = "none";
