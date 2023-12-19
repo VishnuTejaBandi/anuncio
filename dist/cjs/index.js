@@ -677,7 +677,11 @@ class Anuncio {
      * Mutating the item object is not advised.
      */
     get items() {
-        return Object.fromEntries(__classPrivateFieldGet(this, _Anuncio_items, "f").entries());
+        const items = {};
+        __classPrivateFieldGet(this, _Anuncio_items, "f").forEach((value, key) => {
+            items[key] = value;
+        });
+        return items;
     }
     /**
      * Get the current item. Mutation is not advised.
@@ -777,9 +781,9 @@ class Anuncio {
             __classPrivateFieldSet(this, _Anuncio_state, "closed", "f");
             this.closeCurrentItem();
             __classPrivateFieldGet(this, _Anuncio_container, "f").style.display = "none";
-            for (const item of __classPrivateFieldGet(this, _Anuncio_items, "f").values()) {
+            __classPrivateFieldGet(this, _Anuncio_items, "f").forEach((item) => {
                 item.progress.value = 0;
-            }
+            });
             __classPrivateFieldGet(this, _Anuncio_instances, "m", _Anuncio_dispatchEvent).call(this, "anuncio-close", { maxProgressMap: this.maxProgressMap });
         }
     }
@@ -937,7 +941,7 @@ _Anuncio_container = new WeakMap(), _Anuncio_currentIndex = new WeakMap(), _Anun
     //   muteButton
     container.append(progressContainer);
     container.append(configOptions.closeButton);
-    for (const item of __classPrivateFieldGet(this, _Anuncio_items, "f").values()) {
+    __classPrivateFieldGet(this, _Anuncio_items, "f").forEach((item) => {
         item.mediaEl.style.display = "none";
         container.appendChild(item.mediaEl);
         if (item.overlayEl) {
@@ -962,7 +966,7 @@ _Anuncio_container = new WeakMap(), _Anuncio_currentIndex = new WeakMap(), _Anun
                 this.resume();
             });
         }
-    }
+    });
     // this calls the setter and sets the order of the progress elements
     this.order = __classPrivateFieldGet(this, _Anuncio_order, "f");
     container.append(overlayContainer);

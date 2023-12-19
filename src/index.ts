@@ -163,8 +163,12 @@ export class Anuncio {
    * Get the items in the instance as a object in {id : item} format. \
    * Mutating the item object is not advised.
    */
-  get items(): Record<string, ImageItem | VideoItem> {
-    return Object.fromEntries(this.#items.entries());
+  get items() {
+    const items: Record<string, ImageItem | VideoItem> = {};
+    this.#items.forEach((value, key) => {
+      items[key] = value;
+    });
+    return items;
   }
 
   /**
@@ -307,7 +311,7 @@ export class Anuncio {
     container.append(progressContainer);
     container.append(configOptions.closeButton);
 
-    for (const item of this.#items.values()) {
+    this.#items.forEach((item) => {
       item.mediaEl.style.display = "none";
       container.appendChild(item.mediaEl);
 
@@ -338,7 +342,7 @@ export class Anuncio {
           this.resume();
         });
       }
-    }
+    });
 
     // this calls the setter and sets the order of the progress elements
     this.order = this.#order;
@@ -432,9 +436,9 @@ export class Anuncio {
       this.closeCurrentItem();
       this.#container.style.display = "none";
 
-      for (const item of this.#items.values()) {
+      this.#items.forEach((item) => {
         item.progress.value = 0;
-      }
+      });
 
       this.#dispatchEvent("anuncio-close", { maxProgressMap: this.maxProgressMap });
     }

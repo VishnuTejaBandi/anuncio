@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "target": "ES2016",
+    "target": "ES2015",
     "newLine": "LF",
     "useDefineForClassFields": false,
     "declaration": true,
@@ -19,17 +19,9 @@
     "removeComments": false,
     "jsx": "preserve",
     "declarationMap": true,
-    "lib": [
-      "esnext",
-      "dom"
-    ],
-    "noErrorTruncation": true,
+    "lib": ["esnext", "dom"],
+    "noErrorTruncation": true
   },
-  "include": [
-    "src/**/*.ts",
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
