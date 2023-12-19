@@ -1,5 +1,7 @@
 import { AnuncioItemEvent } from "src/types";
 
+let mouseDownElement: HTMLElement | null = null;
+
 export class Item {
   mediaEl: HTMLElement | null = null;
   longPressTimeout: number | null = null;
@@ -33,6 +35,7 @@ export class Item {
     };
 
     const mousedown = (event: MouseEvent | TouchEvent) => {
+      mouseDownElement = this.mediaEl;
       event.preventDefault();
 
       this.longPressTimeout = window.setTimeout(() => {
@@ -51,6 +54,7 @@ export class Item {
     this.mediaEl?.addEventListener("touchcancel", mouseleave);
 
     const mouseup = (event: MouseEvent | TouchEvent) => {
+      if (mouseDownElement !== this.mediaEl) return;
       event.preventDefault();
 
       if (clearLongpress()) {

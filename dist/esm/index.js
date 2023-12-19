@@ -289,6 +289,7 @@ _PAnuncioProgress_value = new WeakMap(), _PAnuncioProgress_max = new WeakMap(), 
     return element;
 };
 
+let mouseDownElement = null;
 class Item {
     constructor() {
         this.mediaEl = null;
@@ -323,6 +324,7 @@ class Item {
             return false;
         };
         const mousedown = (event) => {
+            mouseDownElement = this.mediaEl;
             event.preventDefault();
             this.longPressTimeout = window.setTimeout(() => {
                 var _a;
@@ -340,6 +342,8 @@ class Item {
         (_c = this.mediaEl) === null || _c === void 0 ? void 0 : _c.addEventListener("mouseleave", mouseleave);
         (_d = this.mediaEl) === null || _d === void 0 ? void 0 : _d.addEventListener("touchcancel", mouseleave);
         const mouseup = (event) => {
+            if (mouseDownElement !== this.mediaEl)
+                return;
             event.preventDefault();
             if (clearLongpress()) {
                 this.dispatchEvent("longpress-end");
