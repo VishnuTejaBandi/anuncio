@@ -335,6 +335,7 @@ class Item {
         (_a = this.mediaEl) === null || _a === void 0 ? void 0 : _a.addEventListener("mousedown", mousedown);
         (_b = this.mediaEl) === null || _b === void 0 ? void 0 : _b.addEventListener("touchstart", mousedown);
         const mouseleave = (event) => {
+            mouseDownElement = null;
             event.preventDefault();
             if (clearLongpress())
                 this.dispatchEvent("longpress-end");
@@ -344,6 +345,7 @@ class Item {
         const mouseup = (event) => {
             if (mouseDownElement !== this.mediaEl)
                 return;
+            mouseDownElement = null;
             event.preventDefault();
             if (clearLongpress()) {
                 this.dispatchEvent("longpress-end");

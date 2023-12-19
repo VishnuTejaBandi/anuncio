@@ -47,6 +47,7 @@ export class Item {
     this.mediaEl?.addEventListener("touchstart", mousedown);
 
     const mouseleave = (event: MouseEvent | TouchEvent) => {
+      mouseDownElement = null;
       event.preventDefault();
       if (clearLongpress()) this.dispatchEvent("longpress-end");
     };
@@ -55,6 +56,7 @@ export class Item {
 
     const mouseup = (event: MouseEvent | TouchEvent) => {
       if (mouseDownElement !== this.mediaEl) return;
+      mouseDownElement = null;
       event.preventDefault();
 
       if (clearLongpress()) {
