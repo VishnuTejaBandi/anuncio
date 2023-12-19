@@ -326,8 +326,8 @@ class Item {
             return false;
         };
         const mousedown = (event) => {
-            mouseDownElement = this.mediaEl;
             event.preventDefault();
+            mouseDownElement = this.mediaEl;
             this.longPressTimeout = window.setTimeout(() => {
                 var _a;
                 this.dispatchEvent("longpress-start");
@@ -337,18 +337,18 @@ class Item {
         (_a = this.mediaEl) === null || _a === void 0 ? void 0 : _a.addEventListener("mousedown", mousedown);
         (_b = this.mediaEl) === null || _b === void 0 ? void 0 : _b.addEventListener("touchstart", mousedown);
         const mouseleave = (event) => {
-            mouseDownElement = null;
             event.preventDefault();
+            mouseDownElement = null;
             if (clearLongpress())
                 this.dispatchEvent("longpress-end");
         };
         (_c = this.mediaEl) === null || _c === void 0 ? void 0 : _c.addEventListener("mouseleave", mouseleave);
         (_d = this.mediaEl) === null || _d === void 0 ? void 0 : _d.addEventListener("touchcancel", mouseleave);
         const mouseup = (event) => {
+            event.preventDefault();
             if (mouseDownElement !== this.mediaEl)
                 return;
             mouseDownElement = null;
-            event.preventDefault();
             if (clearLongpress()) {
                 this.dispatchEvent("longpress-end");
             }

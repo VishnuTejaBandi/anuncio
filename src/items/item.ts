@@ -35,8 +35,8 @@ export class Item {
     };
 
     const mousedown = (event: MouseEvent | TouchEvent) => {
-      mouseDownElement = this.mediaEl;
       event.preventDefault();
+      mouseDownElement = this.mediaEl;
 
       this.longPressTimeout = window.setTimeout(() => {
         this.dispatchEvent("longpress-start");
@@ -47,17 +47,18 @@ export class Item {
     this.mediaEl?.addEventListener("touchstart", mousedown);
 
     const mouseleave = (event: MouseEvent | TouchEvent) => {
-      mouseDownElement = null;
       event.preventDefault();
+      mouseDownElement = null;
       if (clearLongpress()) this.dispatchEvent("longpress-end");
     };
     this.mediaEl?.addEventListener("mouseleave", mouseleave);
     this.mediaEl?.addEventListener("touchcancel", mouseleave);
 
     const mouseup = (event: MouseEvent | TouchEvent) => {
+      event.preventDefault();
+
       if (mouseDownElement !== this.mediaEl) return;
       mouseDownElement = null;
-      event.preventDefault();
 
       if (clearLongpress()) {
         this.dispatchEvent("longpress-end");
