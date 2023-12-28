@@ -96,6 +96,7 @@ export class PImageItem extends Item implements ImageItem {
         this.#duration * 1000,
         (completion) => {
           if (completion >= this.#duration * 1000) {
+            this.progress.value = this.#duration * 1000;
             this.dispatchEvent("play-complete");
           } else {
             // updating the progress value with completion percentage

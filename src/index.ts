@@ -484,9 +484,8 @@ export class Anuncio {
    */
   playNextItem() {
     if (this.#state === "playing") {
-      this.closeCurrentItem();
-
       if (this.#currentIndex < this.#items.size - 1) {
+        this.closeCurrentItem();
         this.#currentIndex += 1;
         this.playCurrentItem();
       } else {

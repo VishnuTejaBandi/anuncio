@@ -441,6 +441,7 @@ class PImageItem extends Item {
             this.progress.value = 0;
             imagePlayerInterval = new Interval(__classPrivateFieldGet(this, _PImageItem_duration, "f") * 1000, (completion) => {
                 if (completion >= __classPrivateFieldGet(this, _PImageItem_duration, "f") * 1000) {
+                    this.progress.value = __classPrivateFieldGet(this, _PImageItem_duration, "f") * 1000;
                     this.dispatchEvent("play-complete");
                 }
                 else {
@@ -832,8 +833,8 @@ class Anuncio {
      */
     playNextItem() {
         if (__classPrivateFieldGet(this, _Anuncio_state, "f") === "playing") {
-            this.closeCurrentItem();
             if (__classPrivateFieldGet(this, _Anuncio_currentIndex, "f") < __classPrivateFieldGet(this, _Anuncio_items, "f").size - 1) {
+                this.closeCurrentItem();
                 __classPrivateFieldSet(this, _Anuncio_currentIndex, __classPrivateFieldGet(this, _Anuncio_currentIndex, "f") + 1, "f");
                 this.playCurrentItem();
             }
