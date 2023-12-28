@@ -441,7 +441,7 @@ class PImageItem extends Item {
             this.progress.value = 0;
             imagePlayerInterval = new Interval(__classPrivateFieldGet(this, _PImageItem_duration, "f") * 1000, (completion) => {
                 if (completion >= __classPrivateFieldGet(this, _PImageItem_duration, "f") * 1000) {
-                    this.progress.value = __classPrivateFieldGet(this, _PImageItem_duration, "f") * 1000;
+                    this.progress.value = 100;
                     this.dispatchEvent("play-complete");
                 }
                 else {
