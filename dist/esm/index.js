@@ -201,7 +201,12 @@ class Interval {
      *Starts a interval that can be paused.\
      *Destroys the timer on completion.
      */
-    constructor(duration, onInterval, precision = 30) {
+    constructor(duration, 
+    /**
+     * callback that will be called when interval is elapsed
+     * @param {number} completion - duration in ms
+     */
+    onInterval, precision = 30) {
         _Interval_instances.add(this);
         this.duration = duration;
         this.onInterval = onInterval;
@@ -405,7 +410,7 @@ class PImageItem extends Item {
         return __classPrivateFieldGet(this, _PImageItem_state, "f");
     }
     get duration() {
-        return __classPrivateFieldGet(this, _PImageItem_duration, "f") * 1000;
+        return __classPrivateFieldGet(this, _PImageItem_duration, "f");
     }
     close() {
         __classPrivateFieldSet(this, _PImageItem_state, "closed", "f");

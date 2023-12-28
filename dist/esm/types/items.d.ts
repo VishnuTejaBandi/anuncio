@@ -10,6 +10,9 @@ export interface Item {
     overlayEl?: HTMLElement;
     readonly loading: boolean;
     readonly state: "playing" | "paused" | "play-queued" | "closed";
+    /**
+      in seconds
+    */
     readonly duration: number;
     close(): void;
     pause(): void;

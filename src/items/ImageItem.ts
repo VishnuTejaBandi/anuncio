@@ -46,7 +46,7 @@ export class PImageItem extends Item implements ImageItem {
   }
 
   get duration() {
-    return this.#duration * 1000;
+    return this.#duration;
   }
 
   #createImageEl(imageUrl: ImageOptions["imageUrl"]) {

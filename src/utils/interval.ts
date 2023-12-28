@@ -11,6 +11,10 @@ export class Interval {
    */
   constructor(
     public duration: number,
+    /**
+     * callback that will be called when interval is elapsed
+     * @param {number} completion - duration in ms
+     */
     public onInterval: (completion: number) => void,
     public precision: number = 30
   ) {

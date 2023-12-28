@@ -12,6 +12,9 @@ export interface Item {
 
   readonly loading: boolean;
   readonly state: "playing" | "paused" | "play-queued" | "closed";
+  /** 
+    in seconds
+  */
   readonly duration: number;
 
   close(): void;
